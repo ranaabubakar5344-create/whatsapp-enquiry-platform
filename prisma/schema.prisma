@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  AGENT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  FOLLOW_UP
+  CONVERTED
+  LOST
+}
+
+enum LeadPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ConversationStatus {
+  BOT_ACTIVE
+  WAITING_FOR_AGENT
+  AGENT_ACTIVE
+  CLOSED
+}
+
+enum BotStep {
+  WELCOME
+  LANGUAGE
+  MAIN_MENU
+  ASK_NAME
+  ASK_EMAIL
+  ASK_COURSE
+  ASK_COUNTRY
+  COMPLETED
+  HUMAN_HANDOVER
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageSender {
+  CUSTOMER
+  BOT
+  AGENT
+  SYSTEM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  AUDIO
+  VIDEO
+  LOCATION
+  INTERACTIVE
+}
+
+enum MessageStatus {
+  RECEIVED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model Company {
+  id                        String   @id @default(cuid())
+  name                      String
+  slug                      String   @unique
+  logoUrl                   String?
+  websiteUrl                String?
+  primaryColor              String   @default("#25D366")
+  timezone                  String   @default("Asia/Dubai")
+  whatsappNumber            String?
+  whatsappPhoneNumberId     String?
+  whatsappBusinessAccountId String?
+  widgetKey                 String   @unique @default(cuid())
+  isActive                  Boolean  @default(true)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  users         User[]
+  programmes    Programme[]
+  leads         Lead[]
+  conversations Conversation[]
+  messages      Message[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  companyId    String?
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(AGENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  assignedLeads         Lead[]         @relation("LeadAssignee")
+  assignedConversations Conversation[] @relation("ConversationAssignee")
+
+  @@index([companyId])
+  @@index([role])
+}
+
+model Programme {
+  id          String   @id @default(cuid())
+  companyId   String
+  name        String
+  slug        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, slug])
+  @@index([companyId, isActive])
+}
+
+model Lead {
+  id               String       @id @default(cuid())
+  companyId        String
+  name             String?
+  phone            String
+  email            String?
+  country          String?
+  courseInterested String?
+  source           String       @default("Website WhatsApp")
+  status           LeadStatus   @default(NEW)
+  priority         LeadPriority @default(MEDIUM)
+  assignedToId     String?
+  remarks          String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  assignedTo User? @relation(
+    "LeadAssignee",
+    fields: [assignedToId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  conversations Conversation[]
+
+  @@unique([companyId, phone])
+  @@index([companyId, status])
+  @@index([companyId, createdAt])
+  @@index([assignedToId])
+}
+
+model Conversation {
+  id            String             @id @default(cuid())
+  companyId     String
+  leadId        String?
+  customerPhone String
+  customerName  String?
+  language      String             @default("en")
+  status        ConversationStatus @default(BOT_ACTIVE)
+  currentStep   BotStep            @default(WELCOME)
+  botActive     Boolean            @default(true)
+  assignedToId  String?
+  lastMessageAt DateTime           @default(now())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  lead Lead? @relation(
+    fields: [leadId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  assignedTo User? @relation(
+    "ConversationAssignee",
+    fields: [assignedToId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  messages Message[]
+
+  @@unique([companyId, customerPhone])
+  @@index([companyId, status])
+  @@index([companyId, lastMessageAt])
+  @@index([assignedToId])
+  @@index([leadId])
+}
+
+model Message {
+  id                String           @id @default(cuid())
+  companyId         String
+  conversationId    String
+  whatsappMessageId String?          @unique
+  direction         MessageDirection
+  sender            MessageSender
+  type              MessageType      @default(TEXT)
+  content           String
+  status            MessageStatus
+  createdAt         DateTime         @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  conversation Conversation @relation(
+    fields: [conversationId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@index([companyId, createdAt])
+  @@index([conversationId, createdAt])
+  @@index([status])
+}
