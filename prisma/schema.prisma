@@ -13,6 +13,19 @@ enum UserRole {
   AGENT
 }
 
+enum AgentAvailability {
+  OFFLINE
+  AVAILABLE
+  BUSY
+  AWAY
+}
+
+enum MessagingMode {
+  FREE_MODE
+  WHATSAPP_API
+  HYBRID
+}
+
 enum LeadStatus {
   NEW
   CONTACTED
@@ -29,23 +42,36 @@ enum LeadPriority {
   URGENT
 }
 
+enum ConversationChannel {
+  WEBSITE
+  WHATSAPP_API
+  WHATSAPP_HANDOFF
+}
+
 enum ConversationStatus {
   BOT_ACTIVE
   WAITING_FOR_AGENT
   AGENT_ACTIVE
+  RESOLVED
   CLOSED
+  SPAM
 }
 
 enum BotStep {
   WELCOME
   LANGUAGE
+  CONSENT
   MAIN_MENU
   ASK_NAME
+  ASK_PHONE
   ASK_EMAIL
   ASK_COURSE
   ASK_COUNTRY
+  FAQ
   COMPLETED
-  HUMAN_HANDOVER
+  HUMAN_HANDOFF
+  WAITING_FOR_AGENT
+  AGENT_CONNECTED
 }
 
 enum MessageDirection {
@@ -71,6 +97,7 @@ enum MessageType {
 }
 
 enum MessageStatus {
+  PENDING
   RECEIVED
   SENT
   DELIVERED
@@ -78,27 +105,69 @@ enum MessageStatus {
   FAILED
 }
 
+enum WidgetPosition {
+  BOTTOM_RIGHT
+  BOTTOM_LEFT
+}
+
+enum NotificationType {
+  NEW_CHAT
+  NEW_MESSAGE
+  HANDOFF_REQUESTED
+  CHAT_ASSIGNED
+  FOLLOW_UP_DUE
+  SYSTEM
+}
+
 model Company {
-  id                        String   @id @default(cuid())
-  name                      String
-  slug                      String   @unique
-  logoUrl                   String?
-  websiteUrl                String?
-  primaryColor              String   @default("#25D366")
-  timezone                  String   @default("Asia/Dubai")
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  logoUrl       String?
+  websiteUrl    String?
+  primaryColor  String        @default("#25D366")
+  timezone      String        @default("Asia/Dubai")
+  messagingMode MessagingMode @default(FREE_MODE)
+
   whatsappNumber            String?
-  whatsappPhoneNumberId     String?
+  whatsappPhoneNumberId     String? @unique
   whatsappBusinessAccountId String?
-  widgetKey                 String   @unique @default(cuid())
-  isActive                  Boolean  @default(true)
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
+
+  whatsappAccessTokenEncrypted String?
+  whatsappAppSecretEncrypted   String?
+  whatsappVerifyTokenHash      String?
+  whatsappConfiguredAt         DateTime?
+  whatsappWebhookVerifiedAt    DateTime?
+
+  widgetKey  String  @unique @default(cuid())
+  botEnabled Boolean @default(true)
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users         User[]
   programmes    Programme[]
   leads         Lead[]
   conversations Conversation[]
   messages      Message[]
+
+  widgetSettings  WidgetSettings?
+  widgetDomains   WidgetDomain[]
+  websiteVisitors WebsiteVisitor[]
+  botFaqs         BotFaq[]
+
+  departments       Department[]
+  departmentMembers DepartmentMember[]
+  cannedReplies     CannedReply[]
+  tags              Tag[]
+  conversationTags  ConversationTag[]
+  conversationNotes ConversationNote[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+
+  @@index([isActive])
+  @@index([messagingMode])
 }
 
 model User {
@@ -108,128 +177,465 @@ model User {
   email        String   @unique
   passwordHash String
   role         UserRole @default(AGENT)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  isActive       Boolean           @default(true)
+  availability   AgentAvailability @default(OFFLINE)
+  maxActiveChats Int               @default(10)
+  lastSeenAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   assignedLeads         Lead[]         @relation("LeadAssignee")
   assignedConversations Conversation[] @relation("ConversationAssignee")
+  sentMessages          Message[]      @relation("AgentSentMessages")
+
+  departmentMemberships DepartmentMember[]
+  conversationNotes     ConversationNote[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
 
   @@index([companyId])
-  @@index([role])
+  @@index([companyId, role])
+  @@index([companyId, isActive])
+  @@index([companyId, availability])
 }
 
 model Programme {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   companyId   String
   name        String
   slug        String
   description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  fee         String?
+  duration    String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  leads   Lead[]
 
   @@unique([companyId, slug])
+  @@index([companyId])
   @@index([companyId, isActive])
 }
 
 model Lead {
-  id               String       @id @default(cuid())
-  companyId        String
-  name             String?
-  phone            String
-  email            String?
-  country          String?
-  courseInterested String?
-  source           String       @default("Website WhatsApp")
-  status           LeadStatus   @default(NEW)
-  priority         LeadPriority @default(MEDIUM)
-  assignedToId     String?
-  remarks          String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id           String  @id @default(cuid())
+  companyId    String
+  programmeId  String?
+  assignedToId String?
+
+  name              String?
+  phone             String
+  email             String?
+  country           String?
+  preferredLanguage String  @default("en")
+  courseInterested  String?
+
+  source   String       @default("Website Chat")
+  status   LeadStatus   @default(NEW)
+  priority LeadPriority @default(MEDIUM)
+
+  remarks           String?
+  lastContactedAt   DateTime?
+  followUpDate      DateTime?
+  consentAt         DateTime?
+  whatsappHandoffAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  assignedTo User? @relation(
-    "LeadAssignee",
-    fields: [assignedToId],
-    references: [id],
-    onDelete: SetNull
-  )
+  programme Programme? @relation(fields: [programmeId], references: [id], onDelete: SetNull)
+
+  assignedTo User? @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   conversations Conversation[]
 
   @@unique([companyId, phone])
   @@index([companyId, status])
+  @@index([companyId, priority])
   @@index([companyId, createdAt])
+  @@index([programmeId])
   @@index([assignedToId])
+  @@index([followUpDate])
 }
 
 model Conversation {
-  id            String             @id @default(cuid())
-  companyId     String
-  leadId        String?
+  id               String  @id @default(cuid())
+  companyId        String
+  leadId           String?
+  assignedToId     String?
+  departmentId     String?
+  websiteVisitorId String?
+
   customerPhone String
   customerName  String?
-  language      String             @default("en")
-  status        ConversationStatus @default(BOT_ACTIVE)
-  currentStep   BotStep            @default(WELCOME)
-  botActive     Boolean            @default(true)
-  assignedToId  String?
-  lastMessageAt DateTime           @default(now())
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  customerEmail String?
+  language      String  @default("en")
+
+  channel     ConversationChannel @default(WHATSAPP_API)
+  status      ConversationStatus  @default(BOT_ACTIVE)
+  currentStep BotStep             @default(WELCOME)
+  botActive   Boolean             @default(true)
+
+  contextData   Json?
+  sourcePageUrl String?
+
+  lastMessageAt      DateTime  @default(now())
+  handoffRequestedAt DateTime?
+  acceptedAt         DateTime?
+  firstAgentReplyAt  DateTime?
+  visitorLastReadAt  DateTime?
+  agentLastReadAt    DateTime?
+  resolvedAt         DateTime?
+  closedAt           DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  lead Lead? @relation(
-    fields: [leadId],
-    references: [id],
-    onDelete: SetNull
-  )
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
-  assignedTo User? @relation(
-    "ConversationAssignee",
-    fields: [assignedToId],
-    references: [id],
-    onDelete: SetNull
-  )
+  assignedTo User? @relation("ConversationAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
 
-  messages Message[]
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  websiteVisitor WebsiteVisitor? @relation(fields: [websiteVisitorId], references: [id], onDelete: SetNull)
+
+  messages      Message[]
+  notes         ConversationNote[]
+  tags          ConversationTag[]
+  notifications Notification[]
 
   @@unique([companyId, customerPhone])
-  @@index([companyId, status])
+  @@index([companyId, channel, status])
   @@index([companyId, lastMessageAt])
-  @@index([assignedToId])
   @@index([leadId])
+  @@index([assignedToId])
+  @@index([departmentId])
+  @@index([websiteVisitorId])
 }
 
 model Message {
-  id                String           @id @default(cuid())
-  companyId         String
-  conversationId    String
-  whatsappMessageId String?          @unique
-  direction         MessageDirection
-  sender            MessageSender
-  type              MessageType      @default(TEXT)
-  content           String
-  status            MessageStatus
-  createdAt         DateTime         @default(now())
+  id             String  @id @default(cuid())
+  companyId      String
+  conversationId String
+  senderUserId   String?
+
+  clientMessageId   String?
+  whatsappMessageId String? @unique
+
+  direction MessageDirection
+  sender    MessageSender
+  type      MessageType      @default(TEXT)
+  content   String
+  mediaUrl  String?
+
+  status       MessageStatus @default(RECEIVED)
+  errorMessage String?
+  rawPayload   Json?
+
+  editedAt  DateTime?
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  conversation Conversation @relation(
-    fields: [conversationId],
-    references: [id],
-    onDelete: Cascade
-  )
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderUser User? @relation("AgentSentMessages", fields: [senderUserId], references: [id], onDelete: SetNull)
+
+  @@unique([conversationId, clientMessageId])
+  @@index([companyId, createdAt])
+  @@index([conversationId, createdAt])
+  @@index([senderUserId])
+  @@index([status])
+}
+
+model WebsiteVisitor {
+  id               String @id @default(cuid())
+  companyId        String
+  sessionTokenHash String @unique
+
+  firstPageUrl String?
+  lastPageUrl  String?
+  referrer     String?
+  language     String  @default("en")
+  userAgent    String?
+  ipHash       String?
+
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  conversations Conversation[]
+
+  @@index([companyId, lastSeenAt])
+  @@index([companyId, createdAt])
+}
+
+model WidgetSettings {
+  id        String @id @default(cuid())
+  companyId String @unique
+
+  displayName String?
+  subtitle    String?
+
+  launcherText        String @default("Chat with us")
+  welcomeMessage      String @default("Hello! How can we help you today?")
+  offlineMessage      String @default("Our team is currently offline. Please leave your details.")
+  humanHandoffMessage String @default("Your chat has been transferred to a Marketing Executive.")
+  consentText         String @default("I agree to share my details for enquiry support.")
+
+  primaryColor    String         @default("#25D366")
+  position        WidgetPosition @default(BOTTOM_RIGHT)
+  defaultLanguage String         @default("en")
+  enableArabic    Boolean        @default(false)
+
+  collectName  Boolean @default(true)
+  collectPhone Boolean @default(true)
+  collectEmail Boolean @default(true)
+
+  requireConsent         Boolean @default(true)
+  humanHandoffEnabled    Boolean @default(true)
+  whatsappHandoffEnabled Boolean @default(true)
+  whatsappHandoffNumber  String?
+
+  showOnlineStatus     Boolean @default(true)
+  showAgentAvatars     Boolean @default(true)
+  enableSound          Boolean @default(true)
+  autoOpenDelaySeconds Int     @default(0)
+
+  privacyPolicyUrl String?
+  businessHours    Json?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model WidgetDomain {
+  id        String  @id @default(cuid())
+  companyId String
+  domain    String
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, domain])
+  @@index([companyId, isActive])
+}
+
+model BotFaq {
+  id        String @id @default(cuid())
+  companyId String
+
+  question String
+  answer   String
+  language String  @default("en")
+  category String?
+  keywords Json?
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, language, isActive])
+  @@index([companyId, sortOrder])
+}
+
+model Department {
+  id        String @id @default(cuid())
+  companyId String
+
+  name        String
+  description String?
+  isDefault   Boolean @default(false)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  members       DepartmentMember[]
+  conversations Conversation[]
+
+  @@unique([companyId, name])
+  @@index([companyId, isActive])
+}
+
+model DepartmentMember {
+  id           String @id @default(cuid())
+  companyId    String
+  departmentId String
+  userId       String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([departmentId, userId])
+  @@index([companyId, isActive])
+  @@index([userId])
+}
+
+model CannedReply {
+  id        String @id @default(cuid())
+  companyId String
+
+  title    String
+  content  String
+  category String?
+  shortcut String?
+  language String  @default("en")
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, title])
+  @@index([companyId, isActive])
+  @@index([companyId, language])
+}
+
+model Tag {
+  id        String @id @default(cuid())
+  companyId String
+
+  name  String
+  color String @default("#64748B")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  conversations ConversationTag[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+model ConversationTag {
+  id             String @id @default(cuid())
+  companyId      String
+  conversationId String
+  tagId          String
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, tagId])
+  @@index([companyId])
+  @@index([tagId])
+}
+
+model ConversationNote {
+  id             String @id @default(cuid())
+  companyId      String
+  conversationId String
+  authorId       String
+
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([companyId, createdAt])
   @@index([conversationId, createdAt])
-  @@index([status])
+  @@index([authorId])
+}
+
+model Notification {
+  id             String  @id @default(cuid())
+  companyId      String
+  userId         String
+  conversationId String?
+
+  type  NotificationType
+  title String
+  body  String?
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+  @@index([userId, isRead, createdAt])
+  @@index([conversationId])
+}
+
+model AuditLog {
+  id        String  @id @default(cuid())
+  companyId String
+  userId    String?
+
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+
+  ipHash    String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
 }
