@@ -1,5 +1,6 @@
 "use client";
 
+
 import {
   FormEvent,
   KeyboardEvent,
@@ -124,7 +125,9 @@ type MessagesResponse = {
 
   data?: {
     conversation: ConversationData;
-    messages: ChatMessage[];
+    messages?: ChatMessage[];
+    customerMessage?: ChatMessage;
+    botMessages?: ChatMessage[];
 
     actions?: {
       handoffRequested: boolean;
@@ -395,6 +398,12 @@ export default function WidgetClient({
 
   const welcomeSoundPlayedRef = useRef(false);
   const sendingRef = useRef(false);
+  const refreshInFlightRef = useRef(false);
+  const messageRequestActiveRef = useRef(false);
+  const lastScrolledMessageIdRef =
+    useRef<string | null>(null);
+  const sessionVersionRef = useRef(0);
+
   const sessionStorageKey = useMemo(
     () => `enquiry-widget-session:${widgetKey}`,
     [widgetKey]
@@ -459,18 +468,33 @@ export default function WidgetClient({
     "CONSENT",
   ].includes(conversation?.currentStep ?? "");
 
-  const scrollToBottom = useCallback(() => {
+  const latestMessageId =
+    messages[messages.length - 1]?.id ?? null;
+
+  useEffect(() => {
+    if (
+      !latestMessageId ||
+      lastScrolledMessageIdRef.current ===
+        latestMessageId
+    ) {
+      return;
+    }
+
+    const behavior: ScrollBehavior =
+      lastScrolledMessageIdRef.current === null
+        ? "auto"
+        : "smooth";
+
+    lastScrolledMessageIdRef.current =
+      latestMessageId;
+
     window.setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior,
         block: "end",
       });
     }, 50);
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, sending, scrollToBottom]);
+  }, [latestMessageId]);
 
   useEffect(() => {
     const audio = new Audio(
@@ -695,6 +719,13 @@ useEffect(() => {
         setLoading(true);
         setError(null);
         setShowWhatsAppButton(false);
+
+        sessionVersionRef.current += 1;
+        refreshInFlightRef.current = false;
+        messageRequestActiveRef.current = false;
+        sendingRef.current = false;
+        lastScrolledMessageIdRef.current = null;
+
         window.localStorage.removeItem(
           sessionStorageKey
         );
@@ -762,56 +793,152 @@ useEffect(() => {
     };
   }, [config, loadConfiguration]);
 
+  const currentConversationId =
+    conversation?.id ?? "";
+
+  const currentConversationStatus =
+    conversation?.status ?? "";
+
   const refreshMessages = useCallback(async () => {
     if (
       !accessToken ||
       !visitorSessionToken ||
-      !conversation
+      !currentConversationId ||
+      refreshInFlightRef.current ||
+      messageRequestActiveRef.current ||
+      document.visibilityState !== "visible"
     ) {
       return;
     }
 
-    const searchParams = new URLSearchParams({
-      visitorSessionToken,
-      conversationId: conversation.id,
-    });
+    const requestSessionVersion =
+      sessionVersionRef.current;
 
-    const response = await fetch(
-      `/api/widget/${encodeURIComponent(
-        widgetKey
-      )}/messages?${searchParams.toString()}`,
-      {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-          "X-Widget-Access-Token": accessToken,
-        },
+    refreshInFlightRef.current = true;
+
+    try {
+      const searchParams = new URLSearchParams({
+        visitorSessionToken,
+        conversationId: currentConversationId,
+      });
+
+      const response = await fetch(
+        `/api/widget/${encodeURIComponent(
+          widgetKey
+        )}/messages?${searchParams.toString()}`,
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            "X-Widget-Access-Token":
+              accessToken,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        const refreshedConfig =
+          await loadConfiguration();
+
+        setAccessToken(
+          refreshedConfig.accessToken
+        );
+
+        return;
       }
-    );
 
-    if (response.status === 401) {
-      const refreshedConfig =
-        await loadConfiguration();
+      const result =
+        (await response.json()) as MessagesResponse;
 
-      setAccessToken(refreshedConfig.accessToken);
-      return;
-    }
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data
+      ) {
+        return;
+      }
 
-    const result =
-      (await response.json()) as MessagesResponse;
+      if (
+        messageRequestActiveRef.current ||
+        requestSessionVersion !==
+          sessionVersionRef.current
+      ) {
+        return;
+      }
 
-    if (
-      response.ok &&
-      result.success &&
-      result.data
-    ) {
-      setConversation(result.data.conversation);
-      setMessages(result.data.messages);
+      const nextConversation =
+        result.data.conversation;
+
+      const nextMessages =
+        result.data.messages;
+
+      setConversation((current) => {
+        if (!current) {
+          return nextConversation;
+        }
+
+        const changed =
+          current.id !== nextConversation.id ||
+          current.status !==
+            nextConversation.status ||
+          current.currentStep !==
+            nextConversation.currentStep ||
+          current.botActive !==
+            nextConversation.botActive ||
+          current.lastMessageAt !==
+            nextConversation.lastMessageAt ||
+          current.assignedAgent?.id !==
+            nextConversation.assignedAgent?.id ||
+          current.assignedAgent?.availability !==
+            nextConversation.assignedAgent
+              ?.availability;
+
+        return changed
+          ? nextConversation
+          : current;
+      });
+
+      if (!Array.isArray(nextMessages)) {
+        return;
+      }
+
+      setMessages((current) => {
+        const changed =
+          current.length !== nextMessages.length ||
+          current.some((message, index) => {
+            const nextMessage =
+              nextMessages[index];
+
+            return (
+              !nextMessage ||
+              message.id !== nextMessage.id ||
+              message.status !==
+                nextMessage.status ||
+              message.content !==
+                nextMessage.content ||
+              message.senderUserId !==
+                nextMessage.senderUserId
+            );
+          });
+
+        return changed
+          ? nextMessages
+          : current;
+      });
+    } catch (refreshError) {
+      if (navigator.onLine) {
+        console.warn(
+          "Message refresh temporarily unavailable:",
+          refreshError
+        );
+      }
+    } finally {
+      refreshInFlightRef.current = false;
     }
   }, [
     accessToken,
-    conversation,
+    currentConversationId,
     loadConfiguration,
     visitorSessionToken,
     widgetKey,
@@ -819,7 +946,7 @@ useEffect(() => {
 
   useEffect(() => {
     if (
-      !conversation ||
+      !currentConversationId ||
       !visitorSessionToken ||
       !accessToken
     ) {
@@ -827,28 +954,50 @@ useEffect(() => {
     }
 
     const pollingInterval =
-      conversation.status === "AGENT_ACTIVE" ||
-      conversation.status === "WAITING_FOR_AGENT"
-        ? 2500
-        : 5000;
+      currentConversationStatus ===
+        "AGENT_ACTIVE" ||
+      currentConversationStatus ===
+        "WAITING_FOR_AGENT"
+        ? 5000
+        : 10000;
 
-    const interval = window.setInterval(() => {
-      void refreshMessages().catch(
-        (refreshError) => {
-          console.error(
-            "Message refresh failed:",
-            refreshError
-          );
-        }
-      );
-    }, pollingInterval);
+    const poll = () => {
+      if (
+        document.visibilityState === "visible"
+      ) {
+        void refreshMessages();
+      }
+    };
+
+    const interval = window.setInterval(
+      poll,
+      pollingInterval
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      poll
+    );
+
+    window.addEventListener("online", poll);
 
     return () => {
       window.clearInterval(interval);
+
+      document.removeEventListener(
+        "visibilitychange",
+        poll
+      );
+
+      window.removeEventListener(
+        "online",
+        poll
+      );
     };
   }, [
     accessToken,
-    conversation,
+    currentConversationId,
+    currentConversationStatus,
     refreshMessages,
     visitorSessionToken,
   ]);
@@ -869,6 +1018,7 @@ useEffect(() => {
 }
 
 sendingRef.current = true;
+messageRequestActiveRef.current = true;
 
       const clientMessageId =
         createClientMessageId();
@@ -1000,15 +1150,57 @@ sendingRef.current = true;
           throw new Error(apiError);
         }
 
-        // Temporary message ko database ke real
-        // messages se replace kar dega.
         setConversation(
           result.data.conversation
         );
 
-        setMessages(
-          result.data.messages
-        );
+        /*
+         * Fast API response only returns the newly
+         * created customer and bot messages. This
+         * avoids loading the complete message history
+         * after every send.
+         */
+        if (
+          result.data.customerMessage
+        ) {
+          const newMessages = [
+            result.data.customerMessage,
+            ...(result.data.botMessages ?? []),
+          ];
+
+          setMessages((currentMessages) => {
+            const existingMessages =
+              currentMessages.filter(
+                (currentMessage) =>
+                  currentMessage.id !==
+                  temporaryMessageId
+              );
+
+            const knownIds = new Set(
+              existingMessages.map(
+                (currentMessage) =>
+                  currentMessage.id
+              )
+            );
+
+            const uniqueNewMessages =
+              newMessages.filter(
+                (newMessage) =>
+                  !knownIds.has(newMessage.id)
+              );
+
+            return [
+              ...existingMessages,
+              ...uniqueNewMessages,
+            ];
+          });
+        } else if (result.data.messages) {
+          // Duplicate/recovery responses can still
+          // return the complete message history.
+          setMessages(
+            result.data.messages
+          );
+        }
 
         if (
           result.data.actions
@@ -1039,6 +1231,7 @@ sendingRef.current = true;
             : "Your message could not be sent."
         );
       } finally {
+        messageRequestActiveRef.current = false;
         sendingRef.current = false;
         setSending(false);
       }
@@ -1339,23 +1532,23 @@ sendingRef.current = true;
               );
             })}
 
-       {sending && (
-  <div className="flex justify-start">
-    <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <p className="mb-2 text-[11px] font-medium text-slate-500">
-        {isArabic
-          ? "جاري تحضير الرد..."
-          : "Preparing a response..."}
-      </p>
+            {sending && (
+              <div className="flex justify-start">
+                <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                  <p className="mb-2 text-[11px] font-medium text-slate-500">
+                    {isArabic
+                      ? "جاري تحضير الرد..."
+                      : "Preparing a response..."}
+                  </p>
 
-      <div className="flex gap-1.5">
-        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-        <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
-      </div>
-    </div>
-  </div>
-)}
+                  <div className="flex gap-1.5">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div ref={messagesEndRef} />
           </div>
@@ -1491,7 +1684,7 @@ sendingRef.current = true;
                 value={input}
                 rows={1}
                 maxLength={2000}
-                disabled={sending}
+                disabled={isConversationClosed}
                 onChange={(event) =>
                   setInput(event.target.value)
                 }
@@ -1558,6 +1751,7 @@ sendingRef.current = true;
           </div>
         </footer>
       </section>
+      
     </div>
   );
 }

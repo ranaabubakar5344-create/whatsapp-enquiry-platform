@@ -258,7 +258,7 @@ model Lead {
 
   conversations Conversation[]
 
-  @@unique([companyId, phone])
+  @@index([companyId, phone])
   @@index([companyId, status])
   @@index([companyId, priority])
   @@index([companyId, createdAt])

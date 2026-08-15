@@ -92,22 +92,8 @@ export async function createLead(
   const data = parsed.data;
 
   try {
-    await prisma.lead.upsert({
-      where: {
-        companyId_phone: {
-          companyId,
-          phone: data.phone,
-        },
-      },
-      update: {
-        name: data.name || null,
-        email: data.email || null,
-        country: data.country || null,
-        courseInterested: data.courseInterested || null,
-        priority: data.priority,
-        source: "Manual Entry",
-      },
-      create: {
+    await prisma.lead.create({
+      data: {
         companyId,
         name: data.name || null,
         phone: data.phone,

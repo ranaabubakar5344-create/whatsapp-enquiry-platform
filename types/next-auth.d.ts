@@ -24,4 +24,34 @@ declare module "next-auth/jwt" {
   }
 }
 
+declare module "next-auth/reat" {
+  interface Session {
+    useer : {
+      id :  string;
+      role : string;
+      companyId : string  | null;
+    } & DefaultSession["user"];
+    }
+  }
+
+   declare module "next-auth/jwt" {
+ interface JWT {
+  id ? : string;
+  role ? : string;
+ companyId ? : string | null ;
+ 
+ } }
+  //new module for next-auth/reat
+   
+      declare module "next-auth/reat" {
+        interface Session {
+          user: {
+            id: string;
+            role:string;
+            companyId: string | null;
+          } & DefaultSession["user"]
+        }
+
+   }
+   
 export {};

@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { sendNewEnquiryEmail } from "@/lib/emailNotifications";
 import {
   handleWebsiteBotMessage,
   type WidgetBotContext,
@@ -158,6 +159,7 @@ async function getCompany(
     },
     select: {
       id: true,
+      name: true,
       widgetKey: true,
       botEnabled: true,
 
@@ -174,47 +176,60 @@ async function getCompany(
           whatsappHandoffNumber: true,
         },
       },
-
-      programmes: {
-        where: {
-          isActive: true,
-        },
-        orderBy: {
-          name: "asc",
-        },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          fee: true,
-          duration: true,
-        },
-      },
-
-      botFaqs: {
-        where: {
-          isActive: true,
-        },
-        orderBy: [
-          {
-            sortOrder: "asc",
-          },
-          {
-            createdAt: "asc",
-          },
-        ],
-        select: {
-          id: true,
-          question: true,
-          answer: true,
-          language: true,
-          category: true,
-          keywords: true,
-        },
-      },
     },
   });
+}
+
+async function getBotKnowledge(
+  companyId: string
+) {
+  const [programmes, faqs] = await Promise.all([
+    prisma.programme.findMany({
+      where: {
+        companyId,
+        isActive: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        fee: true,
+        duration: true,
+      },
+    }),
+
+    prisma.botFaq.findMany({
+      where: {
+        companyId,
+        isActive: true,
+      },
+      orderBy: [
+        {
+          sortOrder: "asc",
+        },
+        {
+          createdAt: "asc",
+        },
+      ],
+      select: {
+        id: true,
+        question: true,
+        answer: true,
+        language: true,
+        category: true,
+        keywords: true,
+      },
+    }),
+  ]);
+
+  return {
+    programmes,
+    faqs,
+  };
 }
 
 async function getAuthorizedVisitor({
@@ -444,10 +459,18 @@ export async function GET(
       );
     }
 
-    const company = await getCompany(
-      widgetKey,
-      accessPayload.companyId
-    );
+    const [company, visitor] =
+      await Promise.all([
+        getCompany(
+          widgetKey,
+          accessPayload.companyId
+        ),
+        getAuthorizedVisitor({
+          companyId:
+            accessPayload.companyId,
+          visitorSessionToken,
+        }),
+      ]);
 
     if (
       !company ||
@@ -464,12 +487,6 @@ export async function GET(
         }
       );
     }
-
-    const visitor =
-      await getAuthorizedVisitor({
-        companyId: company.id,
-        visitorSessionToken,
-      });
 
     if (!visitor) {
       return NextResponse.json(
@@ -506,33 +523,12 @@ export async function GET(
       );
     }
 
- const now = new Date();
-
-const messages =
-  await getConversationMessages({
-    companyId: company.id,
-    conversationId: conversation.id,
-  });
-
-await prisma.$transaction([
-  prisma.conversation.update({
-    where: {
-      id: conversation.id,
-    },
-    data: {
-      visitorLastReadAt: now,
-    },
-  }),
-
-  prisma.websiteVisitor.update({
-    where: {
-      id: visitor.id,
-    },
-    data: {
-      lastSeenAt: now,
-    },
-  }),
-]);
+    const messages =
+      await getConversationMessages({
+        companyId: company.id,
+        conversationId:
+          conversation.id,
+      });
     return NextResponse.json(
       {
         success: true,
@@ -736,10 +732,18 @@ export async function POST(
       );
     }
 
-    const company = await getCompany(
-      widgetKey,
-      accessPayload.companyId
-    );
+    const [company, visitor] =
+      await Promise.all([
+        getCompany(
+          widgetKey,
+          accessPayload.companyId
+        ),
+        getAuthorizedVisitor({
+          companyId:
+            accessPayload.companyId,
+          visitorSessionToken,
+        }),
+      ]);
 
     if (
       !company ||
@@ -756,12 +760,6 @@ export async function POST(
         }
       );
     }
-
-    const visitor =
-      await getAuthorizedVisitor({
-        companyId: company.id,
-        visitorSessionToken,
-      });
 
     if (!visitor) {
       return NextResponse.json(
@@ -896,21 +894,26 @@ export async function POST(
       conversation.botActive &&
       conversation.status === "BOT_ACTIVE";
 
-    const decision = shouldRunBot
-      ? handleWebsiteBotMessage({
-          message,
-          currentStep:
-            conversation.currentStep,
-          language:
-            conversation.language,
-          contextData:
-            conversation.contextData,
-          settings,
-          programmes:
-            company.programmes,
-          faqs: company.botFaqs,
-        })
+    const botKnowledge = shouldRunBot
+      ? await getBotKnowledge(company.id)
       : null;
+
+    const decision =
+      shouldRunBot && botKnowledge
+        ? handleWebsiteBotMessage({
+            message,
+            currentStep:
+              conversation.currentStep,
+            language:
+              conversation.language,
+            contextData:
+              conversation.contextData,
+            settings,
+            programmes:
+              botKnowledge.programmes,
+            faqs: botKnowledge.faqs,
+          })
+        : null;
 
     const now = new Date();
 
@@ -1033,6 +1036,41 @@ let nextStatus:
       nextContext.programmeId?.trim() ||
       null;
 
+    /*
+     * The current database has a unique constraint on
+     * (companyId, customerPhone). A returning customer may
+     * start another conversation with the same phone number.
+     * Keep the phone on the Lead, but do not write a duplicate
+     * phone value to a second Conversation record.
+     */
+    let customerPhoneForConversation =
+      contextPhone ??
+      conversation.customerPhone;
+
+    if (
+      contextPhone &&
+      contextPhone !== conversation.customerPhone
+    ) {
+      const conversationUsingPhone =
+        await prisma.conversation.findFirst({
+          where: {
+            companyId: company.id,
+            customerPhone: contextPhone,
+            id: {
+              not: conversation.id,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (conversationUsingPhone) {
+        customerPhoneForConversation =
+          conversation.customerPhone;
+      }
+    }
+
     const notificationUsers =
       shouldNotifyAgents
         ? await prisma.user.findMany({
@@ -1088,19 +1126,17 @@ let nextStatus:
             decision?.leadReady &&
             contextPhone
           ) {
-            const lead =
-              await tx.lead.upsert({
+            if (leadId) {
+              await tx.lead.update({
                 where: {
-                  companyId_phone: {
-                    companyId:
-                      company.id,
-                    phone: contextPhone,
-                  },
+                  id: leadId,
                 },
-                update: {
+                data: {
                   name:
                     contextName ??
                     undefined,
+
+                  phone: contextPhone,
 
                   email:
                     contextEmail ??
@@ -1128,46 +1164,51 @@ let nextStatus:
                       ? now
                       : undefined,
                 },
-                create: {
-                  companyId:
-                    company.id,
-
-                  phone: contextPhone,
-
-                  name: contextName,
-
-                  email: contextEmail,
-
-                  country:
-                    contextCountry,
-
-                  preferredLanguage:
-                    nextLanguage,
-
-                  courseInterested:
-                    contextProgrammeName,
-
-                  programmeId:
-                    contextProgrammeId,
-
-                  source:
-                    "Website Chat",
-
-                  status: "NEW",
-
-                  priority: "MEDIUM",
-
-                  consentAt:
-                    nextContext.consent
-                      ? now
-                      : null,
-                },
-                select: {
-                  id: true,
-                },
               });
+            } else {
+              const lead =
+                await tx.lead.create({
+                  data: {
+                    companyId:
+                      company.id,
 
-            leadId = lead.id;
+                    phone: contextPhone,
+
+                    name: contextName,
+
+                    email: contextEmail,
+
+                    country:
+                      contextCountry,
+
+                    preferredLanguage:
+                      nextLanguage,
+
+                    courseInterested:
+                      contextProgrammeName,
+
+                    programmeId:
+                      contextProgrammeId,
+
+                    source:
+                      "Website Chat",
+
+                    status: "NEW",
+
+                    priority: "MEDIUM",
+
+                    consentAt:
+                      nextContext.consent
+                        ? now
+                        : null,
+                  },
+                  select: {
+                    id: true,
+                  },
+                });
+
+              leadId = lead.id;
+            }
           }
 
           if (
@@ -1203,8 +1244,7 @@ let nextStatus:
                   conversation.customerEmail,
 
                 customerPhone:
-                  contextPhone ??
-                  conversation.customerPhone,
+                  customerPhoneForConversation,
 
                 language:
                   nextLanguage,
@@ -1363,12 +1403,44 @@ let nextStatus:
         }
       );
 
-    const messages =
-      await getConversationMessages({
-        companyId: company.id,
-        conversationId:
-          conversation.id,
+    /*
+     * Send email only once the enquiry form has produced a ready lead.
+     * Next.js `after()` runs this work after the HTTP response, so the
+     * customer does not have to wait for Resend before seeing the bot reply.
+     */
+    if (decision?.leadReady) {
+      const dashboardBaseUrl =
+        process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+        request.nextUrl.origin;
+
+      const emailPayload = {
+        conversationId: conversation.id,
+        companyName: company.name,
+        customerName: contextName,
+        customerPhone: contextPhone,
+        customerEmail: contextEmail,
+        programmeName: contextProgrammeName,
+        country: contextCountry,
+        chatUrl: `${dashboardBaseUrl.replace(
+          /\/$/,
+          ""
+        )}/dashboard/chats/${encodeURIComponent(
+          conversation.id
+        )}`,
+      };
+
+      after(async () => {
+        try {
+          await sendNewEnquiryEmail(emailPayload);
+        } catch (emailError) {
+          // Email problems must never break or roll back the enquiry.
+          console.error(
+            "New enquiry email notification failed:",
+            emailError
+          );
+        }
       });
+    }
 
     return NextResponse.json(
       {
@@ -1382,10 +1454,22 @@ let nextStatus:
           botMessages:
             transactionResult.botMessages,
 
-          conversation:
-            transactionResult.updatedConversation,
+          conversation: {
+            ...transactionResult.updatedConversation,
 
-          messages,
+            assignedAgent:
+              conversation.assignedTo
+                ? {
+                    id:
+                      conversation.assignedTo.id,
+                    name:
+                      conversation.assignedTo.name,
+                    availability:
+                      conversation.assignedTo
+                        .availability,
+                  }
+                : null,
+          },
 
           actions: {
             handoffRequested:

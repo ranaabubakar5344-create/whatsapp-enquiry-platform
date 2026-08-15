@@ -221,7 +221,7 @@ function getMessageContent(message: MetaMessage): {
           : null,
       ]
         .filter(Boolean)
-        .join(" — ");
+        .join(" â€” ");
 
       return {
         type: "LOCATION",
@@ -383,33 +383,56 @@ export async function processWhatsAppWebhook(
         const parsedMessage = getMessageContent(message);
 
         await prisma.$transaction(async (transaction) => {
-          const lead = await transaction.lead.upsert({
-            where: {
-              companyId_phone: {
-                companyId: company.id,
-                phone: customerPhone,
+          const existingConversation =
+            await transaction.conversation.findUnique({
+              where: {
+                companyId_customerPhone: {
+                  companyId: company.id,
+                  customerPhone,
+                },
               },
-            },
+              select: {
+                id: true,
+                leadId: true,
+              },
+            });
 
-            update: {
-              ...(customerName
-                ? {
-                    name: customerName,
-                  }
-                : {}),
-              lastContactedAt: eventDate,
-            },
+          let leadId =
+            existingConversation?.leadId ?? null;
 
-            create: {
-              companyId: company.id,
-              name: customerName,
-              phone: customerPhone,
-              source: "WhatsApp",
-              status: "NEW",
-              priority: "MEDIUM",
-              lastContactedAt: eventDate,
-            },
-          });
+          if (leadId) {
+            await transaction.lead.update({
+              where: {
+                id: leadId,
+              },
+              data: {
+                ...(customerName
+                  ? {
+                      name: customerName,
+                    }
+                  : {}),
+                lastContactedAt: eventDate,
+              },
+            });
+          } else {
+            const lead =
+              await transaction.lead.create({
+                data: {
+                  companyId: company.id,
+                  name: customerName,
+                  phone: customerPhone,
+                  source: "WhatsApp",
+                  status: "NEW",
+                  priority: "MEDIUM",
+                  lastContactedAt: eventDate,
+                },
+                select: {
+                  id: true,
+                },
+              });
+
+            leadId = lead.id;
+          }
 
           const conversation =
             await transaction.conversation.upsert({
@@ -421,7 +444,7 @@ export async function processWhatsAppWebhook(
               },
 
               update: {
-                leadId: lead.id,
+                leadId,
                 ...(customerName
                   ? {
                       customerName,
@@ -433,7 +456,7 @@ export async function processWhatsAppWebhook(
 
               create: {
                 companyId: company.id,
-                leadId: lead.id,
+                leadId,
                 customerPhone,
                 customerName,
                 status: company.botEnabled

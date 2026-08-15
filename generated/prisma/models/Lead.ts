@@ -337,7 +337,6 @@ export type LeadOrderByWithRelationInput = {
 
 export type LeadWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  companyId_phone?: Prisma.LeadCompanyIdPhoneCompoundUniqueInput
   AND?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[]
   OR?: Prisma.LeadWhereInput[]
   NOT?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[]
@@ -364,7 +363,7 @@ export type LeadWhereUniqueInput = Prisma.AtLeast<{
   programme?: Prisma.XOR<Prisma.ProgrammeNullableScalarRelationFilter, Prisma.ProgrammeWhereInput> | null
   assignedTo?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   conversations?: Prisma.ConversationListRelationFilter
-}, "id" | "companyId_phone">
+}, "id">
 
 export type LeadOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -588,11 +587,6 @@ export type LeadListRelationFilter = {
 
 export type LeadOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type LeadCompanyIdPhoneCompoundUniqueInput = {
-  companyId: string
-  phone: string
 }
 
 export type LeadCountOrderByAggregateInput = {

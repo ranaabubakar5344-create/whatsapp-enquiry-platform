@@ -222,11 +222,9 @@ function isNegativeReply(message: string): boolean {
 function getInvalidPhoneMessage(
   language: "en" | "ar"
 ): string {
-  if (language === "ar") {
-    return "يبدو أن رقم الهاتف غير صحيح. يرجى إدخال رقم صالح مع رمز الدولة، مثال: +971000000";
-  }
-
-  return "That phone number does not appear to be valid. Please enter a valid number with country code, for example: +971000000xxx";
+  return language === "ar"
+    ? "رقم الهاتف غير صحيح. يرجى إدخال رقم صالح مع رمز الدولة.\nمثال: +971 000000000"
+    : "That phone number is not valid. Please enter a valid number with country code.\nExample: +971 00 000 0000";
 }
 function isHumanHandoffRequest(message: string): boolean {
   const normalized = normalizeText(message);
@@ -527,10 +525,12 @@ function getNamePrompt(language: "en" | "ar"): string {
     : "Please enter your full name.";
 }
 
-function getPhonePrompt(language: "en" | "ar"): string {
+function getPhonePrompt(
+  language: "en" | "ar"
+): string {
   return language === "ar"
-    ? "يرجى إدخال رقم هاتفك مع رمز الدولة، مثال: +971501234567"
-    : "Please enter your phone number with country code, for example: +9710000000";
+    ? "يرجى إدخال رقم هاتف صحيح مع رمز الدولة.\nمثال: +971 XX XXX XXXX"
+    : "Please enter a valid phone number with country code.\nExample: +971 XX XXX  XXXX";
 }
 
 function getEmailPrompt(language: "en" | "ar"): string {

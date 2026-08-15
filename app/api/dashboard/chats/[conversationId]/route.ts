@@ -16,8 +16,16 @@ type ChatRouteProps = {
 };
 
 type ChatActionBody = {
-  action?: "join" | "send" | "resolve";
+  action?:
+    | "join"
+    | "send"
+    | "resolve"
+    | "whatsapp_contacted"
+    | "set_follow_up"
+    | "complete_follow_up";
   message?: string;
+  followUpAt?: string;
+  followUpNote?: string;
 };
 
 async function getConversation(
@@ -42,6 +50,7 @@ async function getConversation(
       handoffRequestedAt: true,
       acceptedAt: true,
       resolvedAt: true,
+      contextData: true,
       assignedTo: {
         select: {
           id: true,
@@ -52,6 +61,9 @@ async function getConversation(
       lead: {
         select: {
           id: true,
+          name: true,
+          phone: true,
+          email: true,
           courseInterested: true,
           country: true,
           source: true,
@@ -88,16 +100,99 @@ type DashboardConversation = NonNullable<
   Awaited<ReturnType<typeof getConversation>>
 >;
 
+function getContextRecord(
+  value: unknown
+): Record<string, unknown> {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    return {};
+  }
+
+  return value as Record<string, unknown>;
+}
+
 function serializeConversation(
   conversation: DashboardConversation
 ) {
+  const context = getContextRecord(
+    conversation.contextData
+  );
+
+  const whatsappContactedAt =
+    typeof context.crmWhatsappContactedAt ===
+    "string"
+      ? context.crmWhatsappContactedAt
+      : null;
+
+  const whatsappContactedById =
+    typeof context.crmWhatsappContactedById ===
+    "string"
+      ? context.crmWhatsappContactedById
+      : null;
+
+  const whatsappContactedByName =
+    typeof context.crmWhatsappContactedByName ===
+    "string"
+      ? context.crmWhatsappContactedByName
+      : null;
+
+  const followUpAt =
+    typeof context.crmFollowUpAt === "string"
+      ? context.crmFollowUpAt
+      : null;
+
+  const followUpNote =
+    typeof context.crmFollowUpNote === "string"
+      ? context.crmFollowUpNote
+      : null;
+
+  const followUpCreatedById =
+    typeof context.crmFollowUpCreatedById === "string"
+      ? context.crmFollowUpCreatedById
+      : null;
+
+  const followUpCreatedByName =
+    typeof context.crmFollowUpCreatedByName === "string"
+      ? context.crmFollowUpCreatedByName
+      : null;
+
+  const followUpCompletedAt =
+    typeof context.crmFollowUpCompletedAt === "string"
+      ? context.crmFollowUpCompletedAt
+      : null;
+
+  const followUpCompletedById =
+    typeof context.crmFollowUpCompletedById === "string"
+      ? context.crmFollowUpCompletedById
+      : null;
+
+  const followUpCompletedByName =
+    typeof context.crmFollowUpCompletedByName === "string"
+      ? context.crmFollowUpCompletedByName
+      : null;
+
   return {
     id: conversation.id,
     status: conversation.status,
     currentStep: conversation.currentStep,
-    customerName: conversation.customerName,
-    customerPhone: conversation.customerPhone,
-    customerEmail: conversation.customerEmail,
+    // Returning customers can have the same phone number across
+    // multiple conversations. In that case the phone is kept on
+    // the Lead record to avoid the Conversation unique constraint.
+    customerName:
+      conversation.customerName ??
+      conversation.lead?.name ??
+      null,
+    customerPhone:
+      conversation.customerPhone ??
+      conversation.lead?.phone ??
+      null,
+    customerEmail:
+      conversation.customerEmail ??
+      conversation.lead?.email ??
+      null,
     language: conversation.language,
     lastMessageAt:
       conversation.lastMessageAt.toISOString(),
@@ -108,6 +203,32 @@ function serializeConversation(
       conversation.acceptedAt?.toISOString() ?? null,
     resolvedAt:
       conversation.resolvedAt?.toISOString() ?? null,
+    whatsappContactedAt,
+    whatsappContactedBy:
+      whatsappContactedById &&
+      whatsappContactedByName
+        ? {
+            id: whatsappContactedById,
+            name: whatsappContactedByName,
+          }
+        : null,
+    followUpAt,
+    followUpNote,
+    followUpCreatedBy:
+      followUpCreatedById && followUpCreatedByName
+        ? {
+            id: followUpCreatedById,
+            name: followUpCreatedByName,
+          }
+        : null,
+    followUpCompletedAt,
+    followUpCompletedBy:
+      followUpCompletedById && followUpCompletedByName
+        ? {
+            id: followUpCompletedById,
+            name: followUpCompletedByName,
+          }
+        : null,
     assignedAgent: conversation.assignedTo
       ? {
           id: conversation.assignedTo.id,
@@ -119,6 +240,9 @@ function serializeConversation(
     lead: conversation.lead
       ? {
           id: conversation.lead.id,
+          name: conversation.lead.name,
+          phone: conversation.lead.phone,
+          email: conversation.lead.email,
           courseInterested:
             conversation.lead.courseInterested,
           country: conversation.lead.country,
@@ -151,6 +275,9 @@ async function getAuthenticatedUser() {
 
   return {
     id: session.user.id,
+    name:
+      session.user.name?.trim() ||
+      "Team Member",
     companyId: session.user.companyId,
     role: session.user.role,
   };
@@ -275,6 +402,7 @@ export async function POST(
         status: true,
         assignedToId: true,
         firstAgentReplyAt: true,
+        contextData: true,
       },
     });
 
@@ -456,6 +584,122 @@ export async function POST(
         },
       }),
     ]);
+  } else if (
+    body.action === "whatsapp_contacted"
+  ) {
+    const existingContext =
+      getContextRecord(
+        currentConversation.contextData
+      );
+
+    await prisma.conversation.update({
+      where: {
+        id: conversationId,
+      },
+      data: {
+        contextData: JSON.parse(
+          JSON.stringify({
+            ...existingContext,
+            crmWhatsappContactedAt:
+              now.toISOString(),
+            crmWhatsappContactedById:
+              currentUser.id,
+            crmWhatsappContactedByName:
+              currentUser.name,
+          })
+        ),
+      },
+    });
+  } else if (body.action === "set_follow_up") {
+    const followUpDate =
+      typeof body.followUpAt === "string"
+        ? new Date(body.followUpAt)
+        : null;
+
+    const cleanNote =
+      typeof body.followUpNote === "string"
+        ? body.followUpNote.trim()
+        : "";
+
+    if (
+      !followUpDate ||
+      Number.isNaN(followUpDate.getTime()) ||
+      followUpDate.getTime() <= now.getTime()
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Choose a future follow-up date and time.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (cleanNote.length > 500) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Follow-up note cannot exceed 500 characters.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingContext = getContextRecord(
+      currentConversation.contextData
+    );
+
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: {
+        contextData: JSON.parse(
+          JSON.stringify({
+            ...existingContext,
+            crmFollowUpAt: followUpDate.toISOString(),
+            crmFollowUpNote: cleanNote || null,
+            crmFollowUpCreatedAt: now.toISOString(),
+            crmFollowUpCreatedById: currentUser.id,
+            crmFollowUpCreatedByName: currentUser.name,
+            crmFollowUpCompletedAt: null,
+            crmFollowUpCompletedById: null,
+            crmFollowUpCompletedByName: null,
+          })
+        ),
+      },
+    });
+  } else if (body.action === "complete_follow_up") {
+    const existingContext = getContextRecord(
+      currentConversation.contextData
+    );
+
+    const existingFollowUpAt =
+      typeof existingContext.crmFollowUpAt === "string"
+        ? existingContext.crmFollowUpAt
+        : null;
+
+    if (!existingFollowUpAt) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "There is no active follow-up reminder.",
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: {
+        contextData: JSON.parse(
+          JSON.stringify({
+            ...existingContext,
+            crmFollowUpCompletedAt: now.toISOString(),
+            crmFollowUpCompletedById: currentUser.id,
+            crmFollowUpCompletedByName: currentUser.name,
+          })
+        ),
+      },
+    });
   } else if (body.action === "resolve") {
     const canResolve =
       currentConversation.assignedToId ===

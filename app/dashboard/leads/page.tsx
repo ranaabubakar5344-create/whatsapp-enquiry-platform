@@ -1,50 +1,85 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-
 import {
-  Eye,
-  Mail,
-  Phone,
+  CheckCircle2,
+  Clock3,
+  Flame,
   Plus,
-  Search,
-  Users,
+  Target,
+  UserCheck,
+  XCircle,
 } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import LeadForm from "./LeadForm";
+import LeadsTableClient from "./LeadsTableClient";
 
-function statusClasses(status: string) {
-  switch (status) {
-    case "NEW":
-      return "bg-blue-50 text-blue-700";
-    case "CONTACTED":
-      return "bg-amber-50 text-amber-700";
-    case "QUALIFIED":
-      return "bg-purple-50 text-purple-700";
-    case "FOLLOW_UP":
-      return "bg-orange-50 text-orange-700";
-    case "CONVERTED":
-      return "bg-emerald-50 text-emerald-700";
-    case "LOST":
-      return "bg-red-50 text-red-700";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
+type LeadStatus =
+  | "NEW"
+  | "CONTACTED"
+  | "QUALIFIED"
+  | "FOLLOW_UP"
+  | "CONVERTED"
+  | "LOST";
 
-function priorityClasses(priority: string) {
-  switch (priority) {
-    case "URGENT":
-      return "bg-red-50 text-red-700";
-    case "HIGH":
-      return "bg-orange-50 text-orange-700";
-    case "MEDIUM":
-      return "bg-amber-50 text-amber-700";
-    default:
-      return "bg-slate-100 text-slate-600";
-  }
-}
+
+const pipelineStages: Array<{
+  value: LeadStatus;
+  label: string;
+  description: string;
+  icon: typeof Target;
+  cardClass: string;
+  iconClass: string;
+}> = [
+  {
+    value: "NEW",
+    label: "New",
+    description: "New enquiries",
+    icon: Target,
+    cardClass: "border-sky-200 bg-sky-50/70",
+    iconClass: "bg-white text-sky-600",
+  },
+  {
+    value: "CONTACTED",
+    label: "Contacted",
+    description: "Customer reached",
+    icon: UserCheck,
+    cardClass: "border-violet-200 bg-violet-50/70",
+    iconClass: "bg-white text-violet-600",
+  },
+  {
+    value: "QUALIFIED",
+    label: "Interested",
+    description: "Qualified interest",
+    icon: Flame,
+    cardClass: "border-amber-200 bg-amber-50/70",
+    iconClass: "bg-white text-amber-600",
+  },
+  {
+    value: "FOLLOW_UP",
+    label: "Follow-up",
+    description: "Needs follow-up",
+    icon: Clock3,
+    cardClass: "border-orange-200 bg-orange-50/70",
+    iconClass: "bg-white text-orange-600",
+  },
+  {
+    value: "CONVERTED",
+    label: "Converted",
+    description: "Successfully converted",
+    icon: CheckCircle2,
+    cardClass: "border-emerald-200 bg-emerald-50/70",
+    iconClass: "bg-white text-emerald-600",
+  },
+  {
+    value: "LOST",
+    label: "Lost",
+    description: "Closed / lost",
+    icon: XCircle,
+    cardClass: "border-rose-200 bg-rose-50/70",
+    iconClass: "bg-white text-rose-600",
+  },
+];
 
 export default async function LeadsPage() {
   const session = await auth();
@@ -62,6 +97,10 @@ export default async function LeadsPage() {
           <h1 className="text-xl font-bold text-amber-900">
             Company not assigned
           </h1>
+
+          <p className="mt-2 text-sm text-amber-700">
+            Your account must be connected to a company before leads can be viewed.
+          </p>
         </div>
       </main>
     );
@@ -77,9 +116,27 @@ export default async function LeadsPage() {
     take: 100,
   });
 
+  const counts = pipelineStages.reduce<Record<LeadStatus, number>>(
+    (result, stage) => {
+      result[stage.value] = leads.filter(
+        (lead) => lead.status === stage.value
+      ).length;
+
+      return result;
+    },
+    {
+      NEW: 0,
+      CONTACTED: 0,
+      QUALIFIED: 0,
+      FOLLOW_UP: 0,
+      CONVERTED: 0,
+      LOST: 0,
+    }
+  );
+
   return (
     <main className="px-5 py-8 sm:px-8">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600">
             Lead Management
@@ -90,7 +147,7 @@ export default async function LeadsPage() {
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Manage website and WhatsApp customer enquiries.
+            Track every enquiry from first contact to conversion.
           </p>
         </div>
 
@@ -102,6 +159,53 @@ export default async function LeadsPage() {
           <p className="mt-1 text-2xl font-bold text-slate-950">
             {leads.length}
           </p>
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-slate-950">
+            Lead Pipeline
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Live overview of every lead stage.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+          {pipelineStages.map((stage) => {
+            const Icon = stage.icon;
+
+            return (
+              <div
+                key={stage.value}
+                className={`rounded-3xl border p-5 ${stage.cardClass}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                      {stage.label}
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-slate-950">
+                      {counts[stage.value]}
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      {stage.description}
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl shadow-sm ${stage.iconClass}`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -124,161 +228,20 @@ export default async function LeadsPage() {
 
         <LeadForm />
       </section>
-
-  <section className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-  <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h2 className="text-lg font-bold text-slate-950">
-        All leads
-      </h2>
-
-      <p className="mt-1 text-sm text-slate-500">
-        Latest enquiries from all lead sources.
-      </p>
-    </div>
-
-    <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-slate-400">
-      <Search className="h-4 w-4" />
-
-      <span className="text-sm">
-        Search and filters coming next
-      </span>
-    </div>
-  </div>
-
-  {leads.length === 0 ? (
-    <div className="px-6 py-16 text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-        <Users className="h-6 w-6" />
-      </div>
-
-      <h3 className="mt-4 font-bold text-slate-900">
-        No leads available
-      </h3>
-
-      <p className="mt-2 text-sm text-slate-500">
-        Add the first lead using the form above.
-      </p>
-    </div>
-  ) : (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[1100px]">
-        <thead>
-            
-          <tr className="border-b border-slate-200 bg-slate-50 text-left">
-            
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Customer
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Contact
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Programme
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Status
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Priority
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Source
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Date
-            </th>
-
-            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Action
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-  {leads.map((lead) => (
-    <tr
-      key={lead.id}
-      className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70"
-    >
-      <td className="px-6 py-4">
-        <p className="text-sm font-bold text-slate-900">
-          {lead.name ?? "Unknown customer"}
-        </p>
-
-        <p className="mt-1 text-xs text-slate-500">
-          {lead.country ?? "Country not provided"}
-        </p>
-      </td>
-
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <Phone className="h-4 w-4 text-slate-400" />
-          {lead.phone}
-        </div>
-
-        {lead.email ? (
-          <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-            <Mail className="h-3.5 w-3.5" />
-            {lead.email}
-          </div>
-        ) : null}
-      </td>
-
-      <td className="px-6 py-4 text-sm text-slate-600">
-        {lead.courseInterested ?? "Not selected"}
-      </td>
-
-      <td className="px-6 py-4">
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-bold ${statusClasses(
-            lead.status
-          )}`}
-        >
-          {lead.status.replaceAll("_", " ")}
-        </span>
-      </td>
-
-      <td className="px-6 py-4">
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-bold ${priorityClasses(
-            lead.priority
-          )}`}
-        >
-          {lead.priority}
-        </span>
-      </td>
-
-      <td className="px-6 py-4 text-sm text-slate-600">
-        {lead.source}
-      </td>
-
-      <td className="px-6 py-4 text-sm text-slate-500">
-        {lead.createdAt.toLocaleDateString("en-GB")}
-      </td>
-
-      <td className="px-6 py-4">
-        <Link
-          href={`/dashboard/leads/${lead.id}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
-        >
-          <Eye className="h-4 w-4" />
-          View
-        </Link>
-      </td>
-    </tr>
-  ))}
-</tbody>
-      </table>
-    </div>
-  )}
-</section>
+<LeadsTableClient
+  leads={leads.map((lead) => ({
+    id: lead.id,
+    name: lead.name,
+    phone: lead.phone,
+    email: lead.email,
+    country: lead.country,
+    courseInterested: lead.courseInterested,
+    status: lead.status,
+    priority: lead.priority,
+    source: lead.source,
+    createdAt: lead.createdAt.toISOString(),
+  }))}
+/>
     </main>
   );
 }

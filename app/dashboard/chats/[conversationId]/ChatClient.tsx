@@ -5,10 +5,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
+  CalendarClock,
   Mail,
   MessageCircle,
   Phone,
   Send,
+  Sparkles,
   UserRound,
 } from "lucide-react";
 import {
@@ -37,13 +39,29 @@ type ChatConversation = {
   status: string;
   currentStep: string;
   customerName: string | null;
-  customerPhone: string;
+  customerPhone: string | null;
   customerEmail: string | null;
   language: string;
   lastMessageAt: string;
   handoffRequestedAt: string | null;
   acceptedAt: string | null;
   resolvedAt: string | null;
+  whatsappContactedAt: string | null;
+  whatsappContactedBy: {
+    id: string;
+    name: string;
+  } | null;
+  followUpAt: string | null;
+  followUpNote: string | null;
+  followUpCreatedBy: {
+    id: string;
+    name: string;
+  } | null;
+  followUpCompletedAt: string | null;
+  followUpCompletedBy: {
+    id: string;
+    name: string;
+  } | null;
 
   assignedAgent: {
     id: string;
@@ -53,6 +71,9 @@ type ChatConversation = {
 
   lead: {
     id: string;
+    name: string | null;
+    phone: string | null;
+    email: string | null;
     courseInterested: string | null;
     country: string | null;
     source: string;
@@ -108,10 +129,57 @@ function formatDate(value: string): string {
   }).format(date);
 }
 
-function displayPhone(value: string): string {
-  return value.startsWith("web:")
-    ? "Phone not provided"
-    : value;
+function displayPhone(value: string | null): string {
+  if (!value || value.startsWith("web:")) {
+    return "Phone not provided";
+  }
+
+  return value;
+}
+
+function getWhatsAppNumber(
+  value: string | null
+): string | null {
+  if (!value || value.startsWith("web:")) {
+    return null;
+  }
+
+  let digits = value.replace(/\D/g, "");
+
+  // wa.me expects the international number without + or 00.
+  if (digits.startsWith("00")) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length < 7 || digits.length > 15) {
+    return null;
+  }
+
+  return digits;
+}
+
+function getLocalDateTimeMinimum(): string {
+  const date = new Date(Date.now() + 5 * 60_000);
+  const offset = date.getTimezoneOffset();
+
+  return new Date(
+    date.getTime() - offset * 60_000
+  )
+    .toISOString()
+    .slice(0, 16);
+}
+
+function isFollowUpDue(value: string | null): boolean {
+  if (!value) {
+    return false;
+  }
+
+  const date = new Date(value);
+
+  return (
+    !Number.isNaN(date.getTime()) &&
+    date.getTime() <= Date.now()
+  );
 }
 
 function statusLabel(status: string): string {
@@ -152,6 +220,14 @@ export default function ChatClient({
   const [joining, setJoining] = useState(false);
   const [sending, setSending] = useState(false);
   const [resolving, setResolving] = useState(false);
+  const [markingWhatsApp, setMarkingWhatsApp] =
+    useState(false);
+  const [savingFollowUp, setSavingFollowUp] =
+    useState(false);
+  const [completingFollowUp, setCompletingFollowUp] =
+    useState(false);
+  const [followUpAt, setFollowUpAt] = useState("");
+  const [followUpNote, setFollowUpNote] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -238,6 +314,12 @@ export default function ChatClient({
               nextConversation.lastMessageAt ||
             currentConversation.assignedAgent?.id !==
               nextConversation.assignedAgent?.id ||
+            currentConversation.whatsappContactedAt !==
+              nextConversation.whatsappContactedAt ||
+            currentConversation.followUpAt !==
+              nextConversation.followUpAt ||
+            currentConversation.followUpCompletedAt !==
+              nextConversation.followUpCompletedAt ||
             currentConversation.messages.length !==
               nextConversation.messages.length ||
             currentLastMessage?.id !==
@@ -347,7 +429,257 @@ export default function ChatClient({
 
   const customerName =
     conversation?.customerName?.trim() ||
+    conversation?.lead?.name?.trim() ||
     "New Customer";
+
+  const customerPhone =
+    conversation?.customerPhone &&
+    !conversation.customerPhone.startsWith("web:")
+      ? conversation.customerPhone
+      : conversation?.lead?.phone ?? null;
+
+  const customerEmail =
+    conversation?.customerEmail ??
+    conversation?.lead?.email ??
+    null;
+
+  const whatsappNumber = getWhatsAppNumber(
+    customerPhone
+  );
+
+  const whatsappMessage = useMemo(() => {
+    const programme =
+      conversation?.lead?.courseInterested?.trim();
+
+    return [
+      `Hello ${customerName},`,
+      "",
+      programme
+        ? `Thank you for your enquiry regarding ${programme}.`
+        : "Thank you for your enquiry.",
+      "",
+      "We received your request through our website.",
+      "How may I assist you further?",
+    ].join("\n");
+  }, [
+    conversation?.lead?.courseInterested,
+    customerName,
+  ]);
+
+  const quickReplies = useMemo(() => {
+    const programme =
+      conversation?.lead?.courseInterested?.trim();
+
+    return [
+      {
+        label: "Greeting",
+        text: `Hello ${customerName}, thank you for your enquiry. How may I assist you today?`,
+      },
+      {
+        label: "Programme",
+        text: programme
+          ? `Thank you for your interest in ${programme}. I can guide you with the programme details, fees and admission process.`
+          : "Thank you for your enquiry. I can guide you with the programme details, fees and admission process.",
+      },
+      {
+        label: "Documents",
+        text: "Please share your academic documents so we can review your eligibility and guide you on the next step.",
+      },
+      {
+        label: "Follow-up",
+        text: `Hello ${customerName}, I am following up on your enquiry. Please let me know if you need any help with the application process.`,
+      },
+    ];
+  }, [conversation?.lead?.courseInterested, customerName]);
+
+  async function markWhatsAppContacted() {
+    if (
+      markingWhatsApp ||
+      !conversation
+    ) {
+      return;
+    }
+
+    try {
+      setMarkingWhatsApp(true);
+
+      const response = await fetch(
+        `/api/dashboard/chats/${encodeURIComponent(
+          conversationId
+        )}`,
+        {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            action: "whatsapp_contacted",
+          }),
+        }
+      );
+
+      const result =
+        (await response.json()) as ChatApiResponse;
+
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data
+      ) {
+        return;
+      }
+
+      setConversation(
+        result.data.conversation
+      );
+    } catch {
+      // WhatsApp should still open even if CRM tracking
+      // temporarily fails. The next click can retry.
+    } finally {
+      setMarkingWhatsApp(false);
+    }
+  }
+
+  function openCustomerWhatsApp() {
+    if (!whatsappNumber) {
+      return;
+    }
+
+    const text = encodeURIComponent(
+      whatsappMessage
+    );
+
+    /*
+     * Open WhatsApp immediately from the user click so the
+     * browser does not block it as a popup.
+     */
+    window.open(
+      `https://wa.me/${whatsappNumber}?text=${text}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+    void markWhatsAppContacted();
+  }
+
+  async function saveFollowUpReminder() {
+    if (!conversation || savingFollowUp) {
+      return;
+    }
+
+    if (!followUpAt) {
+      setError("Choose a follow-up date and time.");
+      return;
+    }
+
+    try {
+      isMutatingRef.current = true;
+      setSavingFollowUp(true);
+      setError(null);
+
+      const response = await fetch(
+        `/api/dashboard/chats/${encodeURIComponent(
+          conversationId
+        )}`,
+        {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            action: "set_follow_up",
+            followUpAt: new Date(followUpAt).toISOString(),
+            followUpNote: followUpNote.trim(),
+          }),
+        }
+      );
+
+      const result =
+        (await response.json()) as ChatApiResponse;
+
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data
+      ) {
+        throw new Error(
+          result.error ??
+            "Follow-up reminder could not be saved."
+        );
+      }
+
+      setConversation(result.data.conversation);
+      setFollowUpAt("");
+      setFollowUpNote("");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Follow-up reminder could not be saved."
+      );
+    } finally {
+      isMutatingRef.current = false;
+      setSavingFollowUp(false);
+    }
+  }
+
+  async function completeFollowUpReminder() {
+    if (!conversation || completingFollowUp) {
+      return;
+    }
+
+    try {
+      isMutatingRef.current = true;
+      setCompletingFollowUp(true);
+      setError(null);
+
+      const response = await fetch(
+        `/api/dashboard/chats/${encodeURIComponent(
+          conversationId
+        )}`,
+        {
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            action: "complete_follow_up",
+          }),
+        }
+      );
+
+      const result =
+        (await response.json()) as ChatApiResponse;
+
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data
+      ) {
+        throw new Error(
+          result.error ??
+            "Follow-up reminder could not be completed."
+        );
+      }
+
+      setConversation(result.data.conversation);
+    } catch (completeError) {
+      setError(
+        completeError instanceof Error
+          ? completeError.message
+          : "Follow-up reminder could not be completed."
+      );
+    } finally {
+      isMutatingRef.current = false;
+      setCompletingFollowUp(false);
+    }
+  }
 
   const customerInitial = useMemo(
     () => customerName.charAt(0).toUpperCase() || "C",
@@ -717,10 +1049,32 @@ export default function ChatClient({
                     "another team member"}.
                 </div>
               ) : (
-                <form
-                  onSubmit={handleSend}
-                  className="flex items-end gap-3"
-                >
+                <div>
+                  <div className="mb-3">
+                    <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Quick Replies
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {quickReplies.map((reply) => (
+                        <button
+                          key={reply.label}
+                          type="button"
+                          disabled={sending}
+                          onClick={() => setMessage(reply.text)}
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50"
+                        >
+                          {reply.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <form
+                    onSubmit={handleSend}
+                    className="flex items-end gap-3"
+                  >
                   <textarea
                     value={message}
                     rows={1}
@@ -752,7 +1106,8 @@ export default function ChatClient({
                   >
                     <Send className="h-5 w-5" />
                   </button>
-                </form>
+                  </form>
+                </div>
               )}
             </footer>
           </section>
@@ -775,11 +1130,56 @@ export default function ChatClient({
 
               <div className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-slate-400">Phone</p>
                   <p className="mt-1 break-all text-sm font-semibold text-slate-800">
-                    {displayPhone(conversation.customerPhone)}
+                    {displayPhone(customerPhone)}
                   </p>
+
+                  {whatsappNumber ? (
+                    <div className="mt-3 space-y-2">
+                      <button
+                        type="button"
+                        onClick={openCustomerWhatsApp}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#20bd5a]"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 2a9.6 9.6 0 0 0-8.2 14.6L2.5 21.5l5-1.3A9.6 9.6 0 1 0 12 2Zm0 17.4a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3 .8.8-2.9-.2-.3A7.7 7.7 0 1 1 12 19.4Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.2-.3.2-.3.6-1.1.1-.2.1-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.1-.2-.2-.4-.3Z" />
+                        </svg>
+
+                        {markingWhatsApp
+                          ? "Updating CRM..."
+                          : "Open WhatsApp"}
+                      </button>
+
+                      {conversation.whatsappContactedAt && (
+                        <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5">
+                          <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                            <CheckCircle2 className="h-4 w-4" />
+                            WhatsApp Contacted
+                          </div>
+
+                          <p className="mt-1 text-[11px] leading-5 text-emerald-700/80">
+                            {formatDate(
+                              conversation.whatsappContactedAt
+                            )}
+                            {conversation.whatsappContactedBy
+                              ? ` · ${conversation.whatsappContactedBy.name}`
+                              : ""}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-semibold text-amber-700">
+                      WhatsApp is unavailable because a valid customer phone number was not found for this enquiry.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -788,7 +1188,7 @@ export default function ChatClient({
                 <div>
                   <p className="text-xs text-slate-400">Email</p>
                   <p className="mt-1 break-all text-sm font-semibold text-slate-800">
-                    {conversation.customerEmail ??
+                    {customerEmail ??
                       "Not provided"}
                   </p>
                 </div>
@@ -845,6 +1245,130 @@ export default function ChatClient({
                   </dd>
                 </div>
               </dl>
+            </div>
+
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <div className="flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-violet-500" />
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Follow-up Reminder
+                </p>
+              </div>
+
+              {conversation.followUpAt &&
+              !conversation.followUpCompletedAt ? (
+                <div
+                  className={`mt-4 rounded-2xl border p-4 ${
+                    isFollowUpDue(conversation.followUpAt)
+                      ? "border-red-200 bg-red-50"
+                      : "border-violet-200 bg-violet-50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p
+                        className={`text-xs font-extrabold ${
+                          isFollowUpDue(conversation.followUpAt)
+                            ? "text-red-700"
+                            : "text-violet-700"
+                        }`}
+                      >
+                        {isFollowUpDue(conversation.followUpAt)
+                          ? "Follow-up is due"
+                          : "Follow-up scheduled"}
+                      </p>
+
+                      <p className="mt-1 text-sm font-bold text-slate-900">
+                        {formatDate(conversation.followUpAt)}
+                      </p>
+
+                      {conversation.followUpNote && (
+                        <p className="mt-2 text-xs leading-5 text-slate-600">
+                          {conversation.followUpNote}
+                        </p>
+                      )}
+
+                      {conversation.followUpCreatedBy && (
+                        <p className="mt-2 text-[11px] text-slate-500">
+                          Set by {conversation.followUpCreatedBy.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={completingFollowUp}
+                    onClick={() => void completeFollowUpReminder()}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    {completingFollowUp
+                      ? "Updating..."
+                      : "Mark Follow-up Done"}
+                  </button>
+                </div>
+              ) : conversation.followUpCompletedAt ? (
+                <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                  <p className="text-xs font-bold text-emerald-700">
+                    Last follow-up completed
+                  </p>
+                  <p className="mt-1 text-xs text-emerald-700/80">
+                    {formatDate(conversation.followUpCompletedAt)}
+                    {conversation.followUpCompletedBy
+                      ? ` · ${conversation.followUpCompletedBy.name}`
+                      : ""}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="mt-4 space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">
+                    Date & time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    min={getLocalDateTimeMinimum()}
+                    value={followUpAt}
+                    onChange={(event) =>
+                      setFollowUpAt(event.target.value)
+                    }
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">
+                    Note (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    maxLength={500}
+                    value={followUpNote}
+                    onChange={(event) =>
+                      setFollowUpNote(event.target.value)
+                    }
+                    placeholder="Example: Call about documents"
+                    className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:bg-white"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  disabled={savingFollowUp || !followUpAt}
+                  onClick={() => void saveFollowUpReminder()}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <CalendarClock className="h-4 w-4" />
+                  {savingFollowUp
+                    ? "Saving..."
+                    : conversation.followUpAt &&
+                        !conversation.followUpCompletedAt
+                      ? "Reschedule Follow-up"
+                      : "Save Follow-up Reminder"}
+                </button>
+              </div>
             </div>
           </aside>
         </div>
