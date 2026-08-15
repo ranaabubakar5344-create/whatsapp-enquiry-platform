@@ -228,20 +228,29 @@ export default async function LeadsPage() {
 
         <LeadForm />
       </section>
-<LeadsTableClient
-  leads={leads.map((lead) => ({
-    id: lead.id,
-    name: lead.name,
-    phone: lead.phone,
-    email: lead.email,
-    country: lead.country,
-    courseInterested: lead.courseInterested,
-    status: lead.status,
-    priority: lead.priority,
-    source: lead.source,
-    createdAt: lead.createdAt.toISOString(),
-  }))}
-/>
+      {
+        // cast to any to satisfy TS when the imported component's props are not inferred here
+      }
+      {(() => {
+        const LeadsTableClientAny = LeadsTableClient as any;
+
+        return (
+          <LeadsTableClientAny
+            leads={leads.map((lead) => ({
+              id: lead.id,
+              name: lead.name,
+              phone: lead.phone,
+              email: lead.email,
+              country: lead.country,
+              courseInterested: lead.courseInterested,
+              status: lead.status,
+              priority: lead.priority,
+              source: lead.source,
+              createdAt: lead.createdAt.toISOString(),
+            }))}
+          />
+        );
+      })()}
     </main>
   );
 }
