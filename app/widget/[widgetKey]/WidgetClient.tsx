@@ -1335,7 +1335,7 @@ messageRequestActiveRef.current = true;
 
   const companyInitial =
     config.company.name.trim().charAt(0).toUpperCase() || "C";
-
+const chatbotAvatar = "/chatbot.png";
   const agentInitial =
     conversation?.assignedAgent?.name
       ?.trim()
@@ -1362,16 +1362,11 @@ messageRequestActiveRef.current = true;
 
           <div className="relative flex items-center gap-3">
             <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-white/15 text-lg font-black shadow-sm backdrop-blur">
-              {config.company.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={config.company.logoUrl}
-                  alt={config.company.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                companyInitial
-              )}
+            <img
+  src={chatbotAvatar}
+  alt="Chat Support"
+  className="h-full w-full object-cover"
+/>
 
               {config.widget.showOnlineStatus && (
                 <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white" style={{ backgroundColor: whatsappLauncher }} />
@@ -1383,9 +1378,13 @@ messageRequestActiveRef.current = true;
                 <h1 className="truncate text-[15px] font-bold">
                   {config.widget.displayName}
                 </h1>
-                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/90">
-                  Live 
-                </span>
+               <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 shadow-sm">
+  <img
+    src="/chatbot.png"
+    alt="Support Agent"
+    className="h-full w-full object-cover"
+  />
+</div>
                 <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
                   <svg
                     viewBox="0 0 24 24"
@@ -1554,16 +1553,11 @@ messageRequestActiveRef.current = true;
                   className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-sm font-black text-white shadow-sm"
                   style={{ backgroundColor: whatsappPrimary }}
                 >
-                  {config.company.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={config.company.logoUrl}
-                      alt={config.company.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    companyInitial
-                  )}
+                 <img
+  src={chatbotAvatar}
+  alt="Chat Support"
+  className="h-full w-full object-cover"
+/>
                 </div>
 
                 <div className="min-w-0">
@@ -1618,25 +1612,19 @@ messageRequestActiveRef.current = true;
                       className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[11px] font-bold text-white shadow-sm"
                       style={{ backgroundColor: whatsappPrimary }}
                     >
-                      {message.sender === "AGENT"
-                        ? (
-                            message.senderUser?.name ??
-                            conversation?.assignedAgent?.name ??
-                            "A"
-                          )
-                            .trim()
-                            .charAt(0)
-                            .toUpperCase()
-                        : config.company.logoUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={config.company.logoUrl}
-                              alt={config.company.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            companyInitial
-                          )}
+                      {message.sender === "AGENT" ? (
+  <img
+    src="/chatbot.png"
+    alt="Marketing Executive"
+    className="h-full w-full object-cover"
+  />
+) : (
+  <img
+    src="/chatbot.png"
+    alt="Chat Support"
+    className="h-full w-full object-cover"
+  />
+)}
                     </div>
                   )}
 
