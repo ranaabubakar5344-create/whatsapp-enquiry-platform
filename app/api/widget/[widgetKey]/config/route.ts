@@ -36,10 +36,17 @@ function getRequestOrigin(request: NextRequest): string | null {
   const refererHeader = request.headers.get("referer");
 
   if (refererHeader) {
-    return normalizeWidgetOrigin(refererHeader);
+    const normalizedReferer =
+      normalizeWidgetOrigin(refererHeader);
+
+    if (normalizedReferer) {
+      return normalizedReferer;
+    }
   }
 
-  return null;
+  return normalizeWidgetOrigin(
+    request.nextUrl.origin
+  );
 }
 
 function createCorsHeaders(origin: string) {
