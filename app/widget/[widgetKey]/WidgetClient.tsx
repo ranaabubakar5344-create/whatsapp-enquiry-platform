@@ -339,18 +339,25 @@ if (step === "CONSENT") {
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-transparent p-4">
-      <div className="w-full max-w-[420px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-transparent p-3 sm:p-5">
+      <div className="w-full max-w-[430px] overflow-hidden rounded-[30px] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.20)]">
         <div className="animate-pulse">
-          <div className="h-24 bg-slate-200" />
+          <div className="h-28 bg-gradient-to-r from-emerald-200 via-sky-100 to-emerald-100" />
 
-          <div className="space-y-4 p-5">
-            <div className="h-14 w-4/5 rounded-2xl bg-slate-100" />
-            <div className="ml-auto h-12 w-3/5 rounded-2xl bg-slate-100" />
-            <div className="h-14 w-2/3 rounded-2xl bg-slate-100" />
+          <div className="space-y-5 bg-slate-50/70 p-5">
+            <div className="h-5 w-16 rounded-full bg-slate-200" />
+            <div className="flex gap-2">
+              <div className="h-9 w-9 rounded-xl bg-slate-200" />
+              <div className="h-16 w-4/5 rounded-[20px] bg-white shadow-sm" />
+            </div>
+            <div className="ml-auto h-14 w-3/5 rounded-[20px] bg-slate-200" />
+            <div className="flex gap-2">
+              <div className="h-9 w-9 rounded-xl bg-slate-200" />
+              <div className="h-16 w-2/3 rounded-[20px] bg-white shadow-sm" />
+            </div>
           </div>
 
-          <div className="border-t border-slate-100 p-4">
+          <div className="border-t border-slate-100 bg-white p-4">
             <div className="h-12 rounded-2xl bg-slate-100" />
           </div>
         </div>
@@ -431,7 +438,18 @@ export default function WidgetClient({
     conversation?.status === "AGENT_ACTIVE";
 
   const primaryColor =
-    config?.widget.primaryColor ?? "#2563EB";
+    config?.widget.primaryColor ?? "#25D366";
+
+  // WhatsApp-style palette for a more authentic chat appearance.
+  const whatsappHeader = "rgba(0, 128, 105, 1)"; // #008069
+  const whatsappPrimary = "rgba(0, 168, 132, 1)"; // #00A884
+  const whatsappLauncher = "rgba(37, 211, 102, 1)"; // #25D366
+  const whatsappOutgoing = "rgba(217, 253, 211, 1)"; // #D9FDD3
+  const whatsappIncoming = "rgba(255, 255, 255, 1)"; // #FFFFFF
+  const whatsappChatBackground = "rgba(239, 234, 226, 1)"; // #EFEAE2
+  const whatsappText = "rgba(17, 27, 33, 1)"; // #111B21
+  const whatsappMuted = "rgba(102, 119, 129, 1)"; // #667781
+  const whatsappBorder = "rgba(233, 237, 239, 1)"; // #E9EDEF
 
   const whatsappNumber = useMemo(
     () =>
@@ -1288,25 +1306,24 @@ messageRequestActiveRef.current = true;
 
   if (!config || (error && !conversation)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-transparent p-4">
-        <div className="w-full max-w-[420px] rounded-[28px] border border-red-100 bg-white p-8 text-center shadow-2xl">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
-            <span className="text-2xl">!</span>
+      <div className="flex min-h-screen items-center justify-center bg-transparent p-3 sm:p-5">
+        <div className="w-full max-w-[430px] rounded-[30px] border border-red-100 bg-white p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.20)]">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+            <span className="text-2xl font-bold">!</span>
           </div>
 
-          <h1 className="mt-5 text-lg font-bold text-slate-900">
+          <h1 className="mt-5 text-xl font-bold text-slate-950">
             Chat unavailable
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            {error ??
-              "The chat widget could not be loaded."}
+            {error ?? "The chat widget could not be loaded."}
           </p>
 
           <button
             type="button"
             onClick={() => void initialiseWidget()}
-            className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
           >
             Try again
           </button>
@@ -1316,28 +1333,34 @@ messageRequestActiveRef.current = true;
   }
 
   const companyInitial =
-    config.company.name.trim().charAt(0) || "C";
+    config.company.name.trim().charAt(0).toUpperCase() || "C";
+
+  const agentInitial =
+    conversation?.assignedAgent?.name
+      ?.trim()
+      .charAt(0)
+      .toUpperCase() || "A";
 
   return (
-<div
-  dir={isArabic ? "rtl" : "ltr"}
-  onPointerDownCapture={
-    handleFirstWidgetInteraction
-  }
-  className="flex min-h-screen items-center justify-center bg-transparent p-3 font-sans sm:p-5"
->
-      <section className="flex h-[min(720px,calc(100vh-24px))] w-full max-w-[420px] flex-col overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.22)]">
+    <div
+      dir={isArabic ? "rtl" : "ltr"}
+      onPointerDownCapture={handleFirstWidgetInteraction}
+      className="flex min-h-screen items-center justify-center bg-transparent p-2 font-sans sm:p-4"
+    >
+      <section className="relative flex h-[min(748px,calc(100vh-16px))] w-full max-w-[430px] flex-col overflow-hidden rounded-[30px] border border-slate-200/80 bg-white shadow-[0_34px_100px_rgba(15,23,42,0.24)]">
         <header
           className="relative overflow-hidden px-5 pb-5 pt-5 text-white"
           style={{
-            backgroundColor: primaryColor,
+            background: `linear-gradient(135deg, ${whatsappHeader} 0%, rgba(0, 112, 92, 1) 55%, rgba(0, 92, 75, 1) 100%)`,
           }}
         >
-          <div className="absolute -right-12 -top-14 h-36 w-36 rounded-full bg-white/10" />
-          <div className="absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-black/5" />
+          <div className="pointer-events-none absolute -right-14 -top-16 h-44 w-44 rounded-full bg-white/14" />
+          <div className="pointer-events-none absolute -bottom-24 -left-14 h-48 w-48 rounded-full bg-emerald-950/10" />
+          <div className="pointer-events-none absolute right-20 top-8 h-16 w-16 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent" />
 
           <div className="relative flex items-center gap-3">
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/15 text-lg font-bold backdrop-blur">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-white/15 text-lg font-black shadow-sm backdrop-blur">
               {config.company.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -1348,24 +1371,40 @@ messageRequestActiveRef.current = true;
               ) : (
                 companyInitial
               )}
+
+              {config.widget.showOnlineStatus && (
+                <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white" style={{ backgroundColor: whatsappLauncher }} />
+              )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-base font-bold">
-                {config.widget.displayName}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-[15px] font-bold">
+                  {config.widget.displayName}
+                </h1>
+                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/90">
+                  Live
+                </span>
+                <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                  >
+                    <path d="m5 12 4 4L19 6" />
+                  </svg>
+                </span>
+              </div>
 
-              <div className="mt-1 flex items-center gap-2 text-xs text-white/85">
+              <div className="mt-1 flex items-center gap-2 text-[11px] font-medium text-white/85">
                 {config.widget.showOnlineStatus && (
-                  <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,0.16)]" />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-200 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
                 )}
-
                 <span className="truncate">
-                  {isAgentActive &&
-                  conversation?.assignedAgent
-                    ? `${
-                        conversation.assignedAgent.name
-                      } ${
+                  {isAgentActive && conversation?.assignedAgent
+                    ? `${conversation.assignedAgent.name} ${
                         isArabic
                           ? "انضم إلى المحادثة"
                           : "joined the conversation"
@@ -1381,16 +1420,14 @@ messageRequestActiveRef.current = true;
 
             <button
               type="button"
-              onClick={() =>
-                void startNewConversation()
-              }
+              onClick={() => void startNewConversation()}
               title={
                 isArabic
                   ? "بدء محادثة جديدة"
                   : "Start new conversation"
               }
               aria-label="Start new conversation"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 transition hover:bg-white/20"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1404,126 +1441,248 @@ messageRequestActiveRef.current = true;
               </svg>
             </button>
           </div>
+
+          <div className="relative mt-4 flex items-center gap-2 text-[10px] font-medium text-white/75">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 3a5 5 0 0 0-5 5v2H5v11h14V10h-2V8a5 5 0 0 0-5-5Z" />
+              <path d="M9 10V8a3 3 0 0 1 6 0v2" />
+            </svg>
+            <span>
+              {isArabic
+                ? "دعم آمن وسريع للاستفسارات"
+                : "Secure enquiry support • Typically replies quickly"}
+            </span>
+          </div>
         </header>
 
-      {isWaitingForAgent && (
-  <div className="border-b border-amber-100 bg-amber-50 px-4 py-3">
-    <p className="text-xs font-medium leading-5 text-amber-800">
-      {isArabic
-        ? "تم تحويل استفسارك إلى مسؤول التسويق."
-        : "Your enquiry has been transferred to a Marketing Executive."}
-    </p>
-
-    <div className="mt-3 flex gap-2">
-      <button
-        type="button"
-        onClick={() => void startNewConversation()}
-        disabled={loading}
-        className="flex-1 rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-amber-800 shadow-sm ring-1 ring-amber-200 transition hover:bg-amber-100 disabled:opacity-50"
-      >
-        {isArabic
-          ? "بدء محادثة جديدة"
-          : "Start New Chat"}
-      </button>
-
-      {canUseWhatsApp && (
-        <button
-          type="button"
-          onClick={openWhatsApp}
-          className="flex-1 rounded-xl bg-[#25D366] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#20bd5a]"
-        >
-          {isArabic
-            ? "فتح واتساب"
-            : "Open WhatsApp"}
-        </button>
-      )}
-    </div>
-  </div>
-)}
-
-        {isAgentActive &&
-          conversation?.assignedAgent && (
-            <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-800">
-              {isArabic
-                ? `أنت الآن تتحدث مع ${conversation.assignedAgent.name}.`
-                : `You are now chatting with ${conversation.assignedAgent.name}.`}
+        {isWaitingForAgent && (
+          <div className="border-b border-amber-100 bg-amber-50/95 px-4 py-3">
+            <div className="flex gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-amber-900">
+                  {isArabic
+                    ? "تم تحويل استفسارك"
+                    : "Handoff requested"}
+                </p>
+                <p className="mt-1 text-[11px] leading-5 text-amber-800">
+                  {isArabic
+                    ? "تم تحويل استفسارك إلى مسؤول التسويق."
+                    : "Your enquiry has been transferred to a Marketing Executive."}
+                </p>
+              </div>
             </div>
-          )}
 
-        <div className="flex-1 overflow-y-auto bg-slate-50/80 px-4 py-5">
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => void startNewConversation()}
+                disabled={loading}
+                className="rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+              >
+                {isArabic ? "محادثة جديدة" : "New Chat"}
+              </button>
+
+              {canUseWhatsApp && (
+                <button
+                  type="button"
+                  onClick={openWhatsApp}
+                  className="rounded-xl bg-[#25D366] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#20bd5a]"
+                >
+                  {isArabic ? "فتح واتساب" : "Open WhatsApp"}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {isAgentActive && conversation?.assignedAgent && (
+          <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-xs font-bold text-white">
+                {agentInitial}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-emerald-900">
+                  {conversation.assignedAgent.name}
+                </p>
+                <p className="text-[11px] text-emerald-700">
+                  {isArabic
+                    ? "انضم مسؤول التسويق إلى المحادثة."
+                    : "A Marketing Executive has joined the conversation."}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div
+          className="relative flex-1 overflow-y-auto px-4 py-5"
+          style={{
+            backgroundColor: whatsappChatBackground,
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgba(17,27,33,0.055) 1px, transparent 0)",
+            backgroundSize: "22px 22px",
+          }}
+        >
+          <div className="mx-auto mb-5 w-fit rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 shadow-sm backdrop-blur">
+            {isArabic ? "اليوم" : "Today"}
+          </div>
+
           <div className="space-y-4">
+            <div className="rounded-[22px] border border-white/70 bg-white/90 p-3 shadow-sm backdrop-blur">
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-sm font-black text-white shadow-sm"
+                  style={{ backgroundColor: whatsappPrimary }}
+                >
+                  {config.company.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={config.company.logoUrl}
+                      alt={config.company.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    companyInitial
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-slate-900">
+                    {config.widget.displayName}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                    {isArabic
+                      ? "مرحباً! نحن هنا لمساعدتك في البرامج، الرسوم، القبول، أو تحويلك إلى مسؤول التسويق."
+                      : "Hi! I can help with programmes, fees, admission and connect you with a Marketing Executive."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {messages.map((message) => {
-              const isCustomer =
-                message.sender === "CUSTOMER";
+              const isCustomer = message.sender === "CUSTOMER";
+              const isSystem = message.sender === "SYSTEM";
 
               const senderName =
                 message.sender === "AGENT"
                   ? message.senderUser?.name ??
-                    conversation?.assignedAgent
-                      ?.name ??
+                    conversation?.assignedAgent?.name ??
                     "Marketing Executive"
                   : message.sender === "BOT"
                     ? config.widget.displayName
-                    : message.sender === "SYSTEM"
+                    : isSystem
                       ? "System"
                       : isArabic
                         ? "أنت"
                         : "You";
 
+              if (isSystem) {
+                return (
+                  <article key={message.id} className="flex justify-center">
+                    <div className="max-w-[88%] rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-center text-[10px] font-semibold leading-5 text-slate-500 shadow-sm">
+                      {getVisibleMessageContent(message.content, isArabic)}
+                    </div>
+                  </article>
+                );
+              }
+
               return (
                 <article
                   key={message.id}
-                  className={`flex ${
-                    isCustomer
-                      ? "justify-end"
-                      : "justify-start"
+                  className={`flex items-end gap-2 ${
+                    isCustomer ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="max-w-[84%]">
+                  {!isCustomer && config.widget.showAgentAvatars && (
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[11px] font-bold text-white shadow-sm"
+                      style={{ backgroundColor: whatsappPrimary }}
+                    >
+                      {message.sender === "AGENT"
+                        ? (
+                            message.senderUser?.name ??
+                            conversation?.assignedAgent?.name ??
+                            "A"
+                          )
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase()
+                        : config.company.logoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={config.company.logoUrl}
+                              alt={config.company.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            companyInitial
+                          )}
+                    </div>
+                  )}
+
+                  <div className="max-w-[82%]">
                     {!isCustomer && (
-                      <p className="mb-1.5 px-1 text-[11px] font-semibold text-slate-500">
+                      <p className="mb-1.5 px-1 text-[10px] font-bold text-slate-500">
                         {senderName}
                       </p>
                     )}
 
                     <div
-                      className={`whitespace-pre-wrap break-words px-4 py-3 text-sm leading-6 ${
+                      className={`whitespace-pre-wrap break-words px-4 py-3 text-[13px] leading-6 ${
                         isCustomer
-                          ? "rounded-[20px] rounded-br-md text-white"
-                          : "rounded-[20px] rounded-bl-md border border-slate-200 bg-white text-slate-700 shadow-sm"
+                          ? "rounded-[16px] rounded-br-sm shadow-sm"
+                          : "rounded-[16px] rounded-bl-sm shadow-sm"
                       }`}
                       style={
                         isCustomer
                           ? {
-                              backgroundColor:
-                                primaryColor,
+                              backgroundColor: whatsappOutgoing,
+                              color: whatsappText,
                             }
-                          : undefined
+                          : {
+                              backgroundColor: whatsappIncoming,
+                              color: whatsappText,
+                              border: `1px solid ${whatsappBorder}`,
+                            }
                       }
                     >
-{getVisibleMessageContent(
-  message.content,
-  isArabic
-)}                    </div>
+                      {getVisibleMessageContent(message.content, isArabic)}
+                    </div>
 
                     <div
-                      className={`mt-1 flex items-center gap-1 px-1 text-[10px] text-slate-400 ${
-                        isCustomer
-                          ? "justify-end"
-                          : "justify-start"
+                      className={`mt-1 flex items-center gap-1 px-1 text-[9px] text-slate-400 ${
+                        isCustomer ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <span>
-                        {formatMessageTime(
-                          message.createdAt
-                        )}
-                      </span>
-
+                      <span>{formatMessageTime(message.createdAt)}</span>
                       {isCustomer && (
-                        <span>
-                          {message.status === "READ"
-                            ? "✓✓"
-                            : "✓"}
+                        <span
+                          className={
+                            message.status === "READ"
+                              ? "font-bold text-[#53bdeb]"
+                              : ""
+                          }
+                        >
+                          {message.status === "READ" ? "✓✓" : "✓"}
                         </span>
                       )}
                     </div>
@@ -1533,14 +1692,20 @@ messageRequestActiveRef.current = true;
             })}
 
             {sending && (
-              <div className="flex justify-start">
-                <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                  <p className="mb-2 text-[11px] font-medium text-slate-500">
-                    {isArabic
-                      ? "جاري تحضير الرد..."
-                      : "Preparing a response..."}
-                  </p>
+              <div className="flex items-end gap-2">
+                {config.widget.showAgentAvatars && (
+                  <div
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white"
+                    style={{ backgroundColor: whatsappPrimary }}
+                  >
+                    {companyInitial}
+                  </div>
+                )}
 
+                <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                  <p className="mb-2 text-[10px] font-semibold text-slate-500">
+                    {isArabic ? "جاري تحضير الرد..." : "Preparing a response..."}
+                  </p>
                   <div className="flex gap-1.5">
                     <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
                     <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
@@ -1553,167 +1718,136 @@ messageRequestActiveRef.current = true;
             <div ref={messagesEndRef} />
           </div>
         </div>
-{quickReplies.length > 0 &&
-  !isConversationClosed &&
-  !sending && (
+
+        {quickReplies.length > 0 &&
+          !isConversationClosed &&
+          !sending && (
             <div className="border-t border-slate-100 bg-white px-4 py-3">
+              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                {isArabic ? "ردود سريعة" : "Quick replies"}
+              </p>
+
               <div
                 className={`grid gap-2 ${
-                  quickReplies.length > 2
-                    ? "grid-cols-2"
-                    : "grid-cols-1"
+                  quickReplies.length > 2 ? "grid-cols-2" : "grid-cols-1"
                 }`}
               >
-         {quickReplies.map((reply, index) => {
-  const isConsentStep =
-    conversation?.currentStep === "CONSENT";
+                {quickReplies.map((reply, index) => {
+                  const isConsentStep =
+                    conversation?.currentStep === "CONSENT";
+                  const isPrimaryConsent = isConsentStep && index === 0;
+                  const isSecondaryConsent = isConsentStep && index === 1;
 
-  const isPrimaryConsent =
-    isConsentStep && index === 0;
-
-  const isSecondaryConsent =
-    isConsentStep && index === 1;
-
-  return (
-    <button
-      key={`${reply.label}-${reply.value}`}
-      type="button"
-      disabled={sending}
-      onClick={() =>
-        void sendMessage(reply.value)
-      }
-      className={`w-full rounded-xl border px-4 py-3 text-center text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-        isPrimaryConsent
-          ? "text-white shadow-lg hover:scale-[1.01] hover:brightness-95"
-          : isSecondaryConsent
-            ? "bg-slate-50 text-slate-500 hover:bg-slate-100"
-            : "hover:bg-slate-50"
-      }`}
-      style={
-        isPrimaryConsent
-          ? {
-              backgroundColor: primaryColor,
-              borderColor: primaryColor,
-              color: "#ffffff",
-            }
-          : isSecondaryConsent
-            ? {
-                borderColor: "#e2e8f0",
-                color: "#64748b",
-              }
-            : {
-                borderColor: `${primaryColor}55`,
-                color: primaryColor,
-              }
-      }
-    >
-      {reply.label}
-    </button>
-  );
-})}
+                  return (
+                    <button
+                      key={`${reply.label}-${reply.value}`}
+                      type="button"
+                      disabled={sending}
+                      onClick={() => void sendMessage(reply.value)}
+                      className={`min-h-[42px] rounded-xl border px-3 py-2.5 text-center text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                        isPrimaryConsent
+                          ? "text-white shadow-sm hover:brightness-95"
+                          : isSecondaryConsent
+                            ? "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
+                            : "bg-white hover:-translate-y-0.5 hover:shadow-sm"
+                      }`}
+                      style={
+                        isPrimaryConsent
+                          ? {
+                              backgroundColor: whatsappPrimary,
+                              borderColor: whatsappPrimary,
+                            }
+                          : isSecondaryConsent
+                            ? undefined
+                            : {
+                                borderColor: "rgba(0,168,132,0.35)",
+                                color: whatsappPrimary,
+                              }
+                      }
+                    >
+                      {reply.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
-        {(showWhatsAppButton ||
-          isWaitingForAgent) &&
-          canUseWhatsApp && (
-            <div className="border-t border-slate-100 bg-white px-4 py-3">
-              <button
-                type="button"
-                onClick={openWhatsApp}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#20bd5a]"
+        {(showWhatsAppButton || isWaitingForAgent) && canUseWhatsApp && (
+          <div className="border-t border-slate-100 bg-white px-4 py-3">
+            <button
+              type="button"
+              onClick={openWhatsApp}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#20bd5a]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="currentColor"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="currentColor"
-                >
-                  <path d="M12 2a9.6 9.6 0 0 0-8.2 14.6L2.5 21.5l5-1.3A9.6 9.6 0 1 0 12 2Zm0 17.4a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3 .8.8-2.9-.2-.3A7.7 7.7 0 1 1 12 19.4Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.2-.3.2-.3.6-1.1.1-.2.1-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.1-.2-.2-.4-.3Z" />
-                </svg>
-
-                {isArabic
-                  ? "المتابعة عبر واتساب"
-                  : "Continue on WhatsApp"}
-              </button>
-            </div>
-          )}
+                <path d="M12 2a9.6 9.6 0 0 0-8.2 14.6L2.5 21.5l5-1.3A9.6 9.6 0 1 0 12 2Zm0 17.4a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3 .8.8-2.9-.2-.3A7.7 7.7 0 1 1 12 19.4Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.2-.3.2-.3.6-1.1.1-.2.1-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.1-.2-.2-.4-.3Z" />
+              </svg>
+              {isArabic ? "المتابعة عبر واتساب" : "Continue on WhatsApp"}
+            </button>
+          </div>
+        )}
 
         {error && conversation && (
-          <div className="border-t border-red-100 bg-red-50 px-4 py-2 text-center text-xs text-red-700">
+          <div className="border-t border-red-100 bg-red-50 px-4 py-2.5 text-center text-[11px] font-medium text-red-700">
             {error}
           </div>
         )}
 
         <footer className="border-t border-slate-100 bg-white p-3">
-        {isConversationClosed ? (
-  <div className="space-y-3 rounded-2xl bg-slate-50 p-3">
-    <p className="text-center text-xs font-medium text-slate-500">
-      {isArabic
-        ? "تم إغلاق هذه المحادثة."
-        : "This conversation has been closed."}
-    </p>
-
-    <button
-      type="button"
-      onClick={() =>
-        void startNewConversation()
-      }
-      className="w-full rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition hover:brightness-95"
-      style={{
-        backgroundColor: primaryColor,
-      }}
-    >
-      {isArabic
-        ? "بدء محادثة جديدة"
-        : "Start New Chat"}
-    </button>
-  </div>
+          {isConversationClosed ? (
+            <div className="space-y-3 rounded-2xl bg-slate-50 p-3">
+              <p className="text-center text-xs font-medium text-slate-500">
+                {isArabic
+                  ? "تم إغلاق هذه المحادثة."
+                  : "This conversation has been closed."}
+              </p>
+              <button
+                type="button"
+                onClick={() => void startNewConversation()}
+                className="w-full rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition hover:brightness-95"
+                style={{ backgroundColor: whatsappPrimary }}
+              >
+                {isArabic ? "بدء محادثة جديدة" : "Start New Chat"}
+              </button>
+            </div>
           ) : choiceOnlyStep ? (
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-xs font-medium text-slate-500">
+            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-[11px] font-medium text-slate-500">
               {isArabic
                 ? "يرجى اختيار أحد الخيارات أعلاه."
-                : "Please choose one of the options above."}
+                : "Choose one of the options above to continue."}
             </div>
           ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="flex items-end gap-2"
-            >
-              <textarea
-                value={input}
-                rows={1}
-                maxLength={2000}
-                disabled={isConversationClosed}
-                onChange={(event) =>
-                  setInput(event.target.value)
-                }
-                onKeyDown={handleInputKeyDown}
-                placeholder={
-                  isArabic
-                    ? "اكتب رسالتك..."
-                    : "Type your message..."
-                }
-                className="max-h-28 min-h-12 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:bg-white disabled:opacity-60"
-              />
+            <form onSubmit={handleSubmit} className="flex items-end gap-2">
+              <div className="flex min-h-12 flex-1 items-end rounded-2xl border border-slate-200 bg-slate-50 transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+                <textarea
+                  value={input}
+                  rows={1}
+                  maxLength={2000}
+                  disabled={isConversationClosed}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  placeholder={
+                    isArabic ? "اكتب رسالتك..." : "Type your message..."
+                  }
+                  className="max-h-28 min-h-12 flex-1 resize-none bg-transparent px-4 py-3 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60"
+                />
+              </div>
 
               <button
                 type="submit"
-                disabled={
-                  sending ||
-                  input.trim().length === 0
-                }
+                disabled={sending || input.trim().length === 0}
                 aria-label="Send message"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-40"
-                style={{
-                  backgroundColor: primaryColor,
-                }}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ backgroundColor: whatsappPrimary }}
               >
                 <svg
                   viewBox="0 0 24 24"
-                  className={`h-5 w-5 ${
-                    isArabic ? "rotate-180" : ""
-                  }`}
+                  className={`h-5 w-5 ${isArabic ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -1725,7 +1859,10 @@ messageRequestActiveRef.current = true;
             </form>
           )}
 
-          <div className="mt-2 flex items-center justify-center gap-1 text-[10px] text-slate-400">
+          <div
+            className="mt-2.5 flex items-center justify-center gap-1.5 text-[9px] font-medium"
+            style={{ color: whatsappMuted }}
+          >
             <svg
               viewBox="0 0 24 24"
               className="h-3 w-3"
@@ -1733,25 +1870,19 @@ messageRequestActiveRef.current = true;
               stroke="currentColor"
               strokeWidth="2"
             >
-              <rect
-                x="5"
-                y="10"
-                width="14"
-                height="10"
-                rx="2"
-              />
+              <rect x="5" y="10" width="14" height="10" rx="2" />
               <path d="M8 10V7a4 4 0 0 1 8 0v3" />
             </svg>
-
             <span>
               {isArabic
                 ? "محادثة آمنة وخاصة"
                 : "Secure and private conversation"}
             </span>
+            <span className="text-slate-300">•</span>
+            <span>{config.company.name}</span>
           </div>
         </footer>
       </section>
-      
     </div>
   );
 }
