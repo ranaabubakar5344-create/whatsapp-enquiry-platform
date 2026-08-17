@@ -383,6 +383,7 @@ export default function WidgetClient({
     useState<ConversationData | null>(null);
 
   const [messages, setMessages] =
+
     useState<ChatMessage[]>([]);
 
   const [input, setInput] = useState("");
@@ -1383,7 +1384,7 @@ messageRequestActiveRef.current = true;
                   {config.widget.displayName}
                 </h1>
                 <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/90">
-                  Live
+                  Live 
                 </span>
                 <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
                   <svg
