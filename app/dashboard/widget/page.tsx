@@ -474,13 +474,10 @@ export default async function WebsiteWidgetPage({
     frame.setAttribute("allow", "clipboard-write");
     frame.loading = "lazy";
     frame.style.position = "fixed";
-    frame.style.bottom = "72px";
+    frame.style.bottom = "14px";
     frame.style[widgetSide] = "14px";
-frame.style.width = "340px";
-frame.style.height = "520px";
-frame.style.width = "min(340px, calc(100vw - 12px))";
-frame.style.height = "min(520px, calc(100vh - 12px))";
-
+    frame.style.width = "min(350px, calc(100vw - 16px))";
+    frame.style.height = "min(540px, calc(100vh - 84px))";
     frame.style.border = "0";
     frame.style.borderRadius = "22px";
     frame.style.background = "transparent";
@@ -510,29 +507,42 @@ frame.style.height = "min(520px, calc(100vh - 12px))";
     launcher.style.cursor = "pointer";
     launcher.style.boxShadow = "0 14px 40px rgba(15,23,42,0.24)";
     launcher.style.zIndex = "2147483001";
+    launcher.style.display = "inline-flex";
+    launcher.style.alignItems = "center";
+    launcher.style.justifyContent = "center";
 
     var frameLoaded = false;
 
     launcher.addEventListener("click", function () {
-      var currentlyOpen = frame.style.display !== "none";
-
-      if (currentlyOpen) {
-        frame.style.display = "none";
-        launcher.textContent = launcherText;
-        launcher.setAttribute("aria-label", launcherText);
-        launcher.setAttribute("aria-expanded", "false");
-        return;
-      }
-
       if (!frameLoaded) {
         frame.src = widgetUrl;
         frameLoaded = true;
       }
 
       frame.style.display = "block";
-      launcher.textContent = "Close chat";
-      launcher.setAttribute("aria-label", "Close chat");
+      launcher.style.display = "none";
       launcher.setAttribute("aria-expanded", "true");
+    });
+
+    window.addEventListener("message", function (event) {
+      if (
+        !event.data ||
+        event.data.type !== "website-enquiry-widget-close"
+      ) {
+        return;
+      }
+
+      if (
+        frame.contentWindow &&
+        event.source !== frame.contentWindow
+      ) {
+        return;
+      }
+
+      frame.style.display = "none";
+      launcher.style.display = "inline-flex";
+      launcher.setAttribute("aria-label", launcherText);
+      launcher.setAttribute("aria-expanded", "false");
     });
 
     document.body.appendChild(frame);

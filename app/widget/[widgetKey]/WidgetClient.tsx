@@ -1283,6 +1283,24 @@ messageRequestActiveRef.current = true;
     );
   }
 
+  function closeWidget() {
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: "website-enquiry-widget-close",
+          widgetKey,
+        },
+        "*"
+      );
+      return;
+    }
+
+    // Direct Test Widget page: close the tab when possible.
+    if (window.opener) {
+      window.close();
+    }
+  }
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -1313,7 +1331,7 @@ messageRequestActiveRef.current = true;
   }
 
   const chatbotAvatar =
-    config.company.logoUrl || "/chatbot.png";
+    config.company.logoUrl || "/images/chatbot-avatar.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
@@ -1334,8 +1352,9 @@ messageRequestActiveRef.current = true;
     <div
       dir={isArabic ? "rtl" : "ltr"}
       onPointerDownCapture={handleFirstWidgetInteraction}
-className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"    >
-      <section className="flex h-full w-full max-w-none flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
+      className="flex min-h-screen items-center justify-center bg-transparent p-1 font-sans"
+    >
+      <section className="flex h-[min(520px,calc(100vh-8px))] w-full max-w-[340px] flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
         <header
           className="relative overflow-hidden px-3.5 py-3 text-white"
           style={{ backgroundColor: waHeader }}
@@ -1386,9 +1405,9 @@ className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"    >
 
             <button
               type="button"
-              onClick={() => void startNewConversation()}
-              title={isArabic ? "محادثة جديدة" : "Start new chat"}
-              aria-label="Start new conversation"
+              onClick={closeWidget}
+              title={isArabic ? "إغلاق المحادثة" : "Close chat"}
+              aria-label={isArabic ? "إغلاق المحادثة" : "Close chat"}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
             >
               <svg
@@ -1396,10 +1415,11 @@ className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"    >
                 className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.2"
+                strokeLinecap="round"
               >
-                <path d="M20 11a8 8 0 1 0-2.3 5.7" />
-                <path d="M20 4v7h-7" />
+                <path d="M6 6l12 12" />
+                <path d="M18 6L6 18" />
               </svg>
             </button>
           </div>
