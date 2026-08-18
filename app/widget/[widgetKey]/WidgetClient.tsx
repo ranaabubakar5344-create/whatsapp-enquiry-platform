@@ -339,26 +339,20 @@ if (step === "CONSENT") {
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-transparent p-3 sm:p-5">
-      <div className="w-full max-w-[430px] overflow-hidden rounded-[30px] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.20)]">
+    <div className="flex min-h-screen items-center justify-center bg-transparent p-1.5">
+      <div className="w-full max-w-[340px] overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.18)]">
         <div className="animate-pulse">
-          <div className="h-28 bg-gradient-to-r from-emerald-200 via-sky-100 to-emerald-100" />
-
-          <div className="space-y-5 bg-slate-50/70 p-5">
-            <div className="h-5 w-16 rounded-full bg-slate-200" />
+          <div className="h-[78px] bg-[#008069]" />
+          <div className="space-y-3 bg-[#EFEAE2] p-3.5">
+            <div className="h-4 w-14 rounded-full bg-white/80" />
             <div className="flex gap-2">
-              <div className="h-9 w-9 rounded-xl bg-slate-200" />
-              <div className="h-16 w-4/5 rounded-[20px] bg-white shadow-sm" />
+              <div className="h-7 w-7 rounded-full bg-white" />
+              <div className="h-12 w-3/4 rounded-2xl bg-white" />
             </div>
-            <div className="ml-auto h-14 w-3/5 rounded-[20px] bg-slate-200" />
-            <div className="flex gap-2">
-              <div className="h-9 w-9 rounded-xl bg-slate-200" />
-              <div className="h-16 w-2/3 rounded-[20px] bg-white shadow-sm" />
-            </div>
+            <div className="ml-auto h-11 w-1/2 rounded-2xl bg-[#D9FDD3]" />
           </div>
-
-          <div className="border-t border-slate-100 bg-white p-4">
-            <div className="h-12 rounded-2xl bg-slate-100" />
+          <div className="border-t border-slate-100 bg-white p-2.5">
+            <div className="h-10 rounded-full bg-slate-100" />
           </div>
         </div>
       </div>
@@ -438,20 +432,7 @@ export default function WidgetClient({
     conversation?.status === "AGENT_ACTIVE";
 
   const primaryColor =
-    config?.widget.primaryColor ?? "#25D366";
-
-  // WhatsApp-style palette for a more authentic chat appearance.
-  const whatsappHeader = "rgba(0, 128, 105, 1)"; // #008069
-  const whatsappPrimary = "rgba(0, 168, 132, 1)"; // #00A884
-  const whatsappLauncher = "rgba(37, 211, 102, 1)"; // #25D366
-  const whatsappOutgoing = "rgba(217, 253, 211, 1)"; // #D9FDD3
-  const whatsappIncoming = "rgba(255, 255, 255, 1)"; // #FFFFFF
-  const whatsappChatBackground = "rgba(239, 234, 226, 1)"; // #EFEAE2
-  const whatsappText = "rgba(17, 27, 33, 1)"; // #111B21
-  const whatsappMuted = "rgba(102, 119, 129, 1)"; // #667781
-  const whatsappBorder = "rgba(233, 237, 239, 1)"; // #E9EDEF
-  const chatbotAvatar =
-    config?.company?.logoUrl || "/chatbot.png";
+    config?.widget.primaryColor ?? "#2563EB";
 
   const whatsappNumber = useMemo(
     () =>
@@ -1308,24 +1289,21 @@ messageRequestActiveRef.current = true;
 
   if (!config || (error && !conversation)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-transparent p-3 sm:p-5">
-        <div className="w-full max-w-[430px] rounded-[30px] border border-red-100 bg-white p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.20)]">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-            <span className="text-2xl font-bold">!</span>
+      <div className="flex min-h-screen items-center justify-center bg-transparent p-2">
+        <div className="w-full max-w-[340px] rounded-[22px] border border-red-100 bg-white p-6 text-center shadow-[0_22px_60px_rgba(15,23,42,0.18)]">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-lg font-black text-red-600">
+            !
           </div>
-
-          <h1 className="mt-5 text-xl font-bold text-slate-950">
+          <h1 className="mt-4 text-base font-bold text-[#111B21]">
             Chat unavailable
           </h1>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-xs leading-5 text-[#667781]">
             {error ?? "The chat widget could not be loaded."}
           </p>
-
           <button
             type="button"
             onClick={() => void initialiseWidget()}
-            className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+            className="mt-5 rounded-full bg-[#008069] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#006f5c]"
           >
             Try again
           </button>
@@ -1334,8 +1312,8 @@ messageRequestActiveRef.current = true;
     );
   }
 
-  const companyInitial =
-    config.company.name.trim().charAt(0).toUpperCase() || "C";
+  const chatbotAvatar =
+    config.company.logoUrl || "/images/chatbot-avatar.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
@@ -1343,63 +1321,65 @@ messageRequestActiveRef.current = true;
       .charAt(0)
       .toUpperCase() || "A";
 
+  const waHeader = "#008069";
+  const waAction = "#00A884";
+  const waLauncher = "#25D366";
+  const waOutgoing = "#D9FDD3";
+  const waBackground = "#EFEAE2";
+  const waText = "#111B21";
+  const waMuted = "#667781";
+  const waBorder = "#E9EDEF";
+
   return (
     <div
       dir={isArabic ? "rtl" : "ltr"}
       onPointerDownCapture={handleFirstWidgetInteraction}
-      className="flex min-h-screen items-center justify-center bg-transparent p-1.5 font-sans sm:p-2"
+      className="flex min-h-screen items-center justify-center bg-transparent p-1 font-sans"
     >
-      <section className="relative flex h-[min(640px,calc(100vh-10px))] w-full max-w-[390px] flex-col overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+      <section className="flex h-[min(520px,calc(100vh-8px))] w-full max-w-[340px] flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
         <header
-          className="relative overflow-hidden px-4 pb-3.5 pt-4 text-white"
-          style={{
-            background: `linear-gradient(135deg, ${whatsappHeader} 0%, rgba(0, 112, 92, 1) 55%, rgba(0, 92, 75, 1) 100%)`,
-          }}
+          className="relative overflow-hidden px-3.5 py-3 text-white"
+          style={{ backgroundColor: waHeader }}
         >
-          <div className="pointer-events-none absolute -right-14 -top-16 h-44 w-44 rounded-full bg-white/14" />
-          <div className="pointer-events-none absolute -bottom-24 -left-14 h-48 w-48 rounded-full bg-emerald-950/10" />
-          <div className="pointer-events-none absolute right-20 top-8 h-16 w-16 rounded-full border border-white/10" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent" />
+          <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -bottom-16 right-5 h-24 w-24 rounded-full bg-white/[0.05]" />
 
-          <div className="relative flex items-center gap-3">
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/15 shadow-sm">
+          <div className="relative flex items-center gap-2.5">
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white/80 bg-white shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={chatbotAvatar}
                 alt={config.widget.displayName}
                 className="h-full w-full object-cover"
               />
-
               {config.widget.showOnlineStatus && (
                 <span
-                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white"
-                  style={{ backgroundColor: whatsappLauncher }}
+                  className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white"
+                  style={{ backgroundColor: waLauncher }}
                 />
               )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="truncate text-[14px] font-bold">
-                  {config.widget.displayName}
-                </h1>
-              </div>
-
-              <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-white/85">
+              <h1 className="truncate text-[13px] font-bold leading-5">
+                {config.widget.displayName}
+              </h1>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[9.5px] text-white/85">
                 {config.widget.showOnlineStatus && (
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-200 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: waLauncher }}
+                  />
                 )}
                 <span className="truncate">
                   {isAgentActive && conversation?.assignedAgent
                     ? `${conversation.assignedAgent.name} ${
-                        isArabic
-                          ? "انضم إلى المحادثة"
-                          : "joined the conversation"
+                        isArabic ? "متصل الآن" : "is online"
                       }`
                     : isWaitingForAgent
                       ? isArabic
-                        ? "في انتظار مسؤول التسويق"
-                        : "Waiting for a Marketing Executive"
+                        ? "جاري توصيلك بمسؤول التسويق"
+                        : "Connecting you to a Marketing Executive"
                       : config.widget.subtitle}
                 </span>
               </div>
@@ -1408,17 +1388,13 @@ messageRequestActiveRef.current = true;
             <button
               type="button"
               onClick={() => void startNewConversation()}
-              title={
-                isArabic
-                  ? "بدء محادثة جديدة"
-                  : "Start new conversation"
-              }
+              title={isArabic ? "محادثة جديدة" : "Start new chat"}
               aria-label="Start new conversation"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 transition hover:bg-white/20"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-5 w-5"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -1428,33 +1404,15 @@ messageRequestActiveRef.current = true;
               </svg>
             </button>
           </div>
-
-          <div className="relative mt-3 flex items-center gap-1.5 text-[9px] font-medium text-white/75">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M12 3a5 5 0 0 0-5 5v2H5v11h14V10h-2V8a5 5 0 0 0-5-5Z" />
-              <path d="M9 10V8a3 3 0 0 1 6 0v2" />
-            </svg>
-            <span>
-              {isArabic
-                ? "دعم آمن وسريع للاستفسارات"
-                : "Secure enquiry support • Typically replies quickly"}
-            </span>
-          </div>
         </header>
 
         {isWaitingForAgent && (
-          <div className="border-b border-amber-100 bg-amber-50/95 px-3 py-2.5">
-            <div className="flex gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+          <div className="border-b border-amber-100 bg-[#FFF8E1] px-3 py-2.5">
+            <div className="flex items-start gap-2">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
                 <svg
                   viewBox="0 0 24 24"
-                  className="h-4 w-4"
+                  className="h-3.5 w-3.5"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -1463,26 +1421,25 @@ messageRequestActiveRef.current = true;
                   <path d="M12 7v5l3 2" />
                 </svg>
               </div>
+
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-amber-900">
-                  {isArabic
-                    ? "تم تحويل استفسارك"
-                    : "Handoff requested"}
+                <p className="text-[10.5px] font-bold text-amber-900">
+                  {isArabic ? "تم طلب التحويل" : "Handoff requested"}
                 </p>
-                <p className="mt-1 text-[11px] leading-5 text-amber-800">
+                <p className="mt-0.5 text-[9px] leading-4 text-amber-800">
                   {isArabic
-                    ? "تم تحويل استفسارك إلى مسؤول التسويق."
-                    : "Your enquiry has been transferred to a Marketing Executive."}
+                    ? "سيقوم مسؤول التسويق بالانضمام إلى المحادثة."
+                    : "A Marketing Executive will join your conversation."}
                 </p>
               </div>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
               <button
                 type="button"
                 onClick={() => void startNewConversation()}
                 disabled={loading}
-                className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-[11px] font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                className="rounded-lg border border-amber-200 bg-white px-2.5 py-2 text-[9.5px] font-bold text-amber-800 transition hover:bg-amber-50 disabled:opacity-50"
               >
                 {isArabic ? "محادثة جديدة" : "New Chat"}
               </button>
@@ -1491,7 +1448,7 @@ messageRequestActiveRef.current = true;
                 <button
                   type="button"
                   onClick={openWhatsApp}
-                  className="rounded-xl bg-[#25D366] px-3 py-2 text-[11px] font-bold text-white transition hover:bg-[#20bd5a]"
+                  className="rounded-lg bg-[#25D366] px-2.5 py-2 text-[9.5px] font-bold text-white transition hover:bg-[#20bd5a]"
                 >
                   {isArabic ? "فتح واتساب" : "Open WhatsApp"}
                 </button>
@@ -1501,19 +1458,22 @@ messageRequestActiveRef.current = true;
         )}
 
         {isAgentActive && conversation?.assignedAgent && (
-          <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-xs font-bold text-white">
+          <div className="border-b border-emerald-100 bg-emerald-50 px-3 py-2">
+            <div className="flex items-center gap-2">
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                style={{ backgroundColor: waAction }}
+              >
                 {agentInitial}
               </div>
-              <div>
-                <p className="text-xs font-bold text-emerald-900">
+              <div className="min-w-0">
+                <p className="truncate text-[10.5px] font-bold text-emerald-900">
                   {conversation.assignedAgent.name}
                 </p>
-                <p className="text-[11px] text-emerald-700">
+                <p className="text-[9px] text-emerald-700">
                   {isArabic
-                    ? "انضم مسؤول التسويق إلى المحادثة."
-                    : "A Marketing Executive has joined the conversation."}
+                    ? "مسؤول التسويق متصل الآن"
+                    : "Marketing Executive is now online"}
                 </p>
               </div>
             </div>
@@ -1521,19 +1481,19 @@ messageRequestActiveRef.current = true;
         )}
 
         <div
-          className="relative flex-1 overflow-y-auto px-3.5 py-4"
+          className="relative flex-1 overflow-y-auto px-3 py-3"
           style={{
-            backgroundColor: whatsappChatBackground,
+            backgroundColor: waBackground,
             backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(17,27,33,0.055) 1px, transparent 0)",
-            backgroundSize: "22px 22px",
+              "radial-gradient(circle at 1px 1px, rgba(17,27,33,0.045) 1px, transparent 0)",
+            backgroundSize: "20px 20px",
           }}
         >
-          <div className="mx-auto mb-4 w-fit rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400 shadow-sm backdrop-blur">
+          <div className="mx-auto mb-3 w-fit rounded-full bg-white/90 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 shadow-sm">
             {isArabic ? "اليوم" : "Today"}
           </div>
 
-          <div className="space-y-3.5">
+          <div className="space-y-2.5">
             {messages.map((message) => {
               const isCustomer = message.sender === "CUSTOMER";
               const isSystem = message.sender === "SYSTEM";
@@ -1554,7 +1514,7 @@ messageRequestActiveRef.current = true;
               if (isSystem) {
                 return (
                   <article key={message.id} className="flex justify-center">
-                    <div className="max-w-[88%] rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-center text-[10px] font-semibold leading-5 text-slate-500 shadow-sm">
+                    <div className="max-w-[88%] rounded-full bg-white/85 px-3 py-1.5 text-center text-[8.5px] font-medium leading-4 text-[#667781] shadow-sm">
                       {getVisibleMessageContent(message.content, isArabic)}
                     </div>
                   </article>
@@ -1564,14 +1524,14 @@ messageRequestActiveRef.current = true;
               return (
                 <article
                   key={message.id}
-                  className={`flex items-end gap-2 ${
+                  className={`flex items-end gap-1.5 ${
                     isCustomer ? "justify-end" : "justify-start"
                   }`}
                 >
                   {!isCustomer && config.widget.showAgentAvatars && (
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white text-[10px] font-bold text-white shadow-sm"
-                      style={{ backgroundColor: whatsappPrimary }}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white text-[9px] font-bold text-white shadow-sm"
+                      style={{ backgroundColor: waAction }}
                     >
                       {message.sender === "AGENT" ? (
                         (
@@ -1593,29 +1553,27 @@ messageRequestActiveRef.current = true;
                     </div>
                   )}
 
-                  <div className="max-w-[80%]">
+                  <div className="max-w-[78%]">
                     {message.sender === "AGENT" && (
-                      <p className="mb-1 px-1 text-[10px] font-bold text-slate-500">
+                      <p className="mb-0.5 px-1 text-[8.5px] font-bold text-[#667781]">
                         {senderName}
                       </p>
                     )}
 
                     <div
-                      className={`whitespace-pre-wrap break-words px-3.5 py-2.5 text-[12.5px] leading-5 ${
-                        isCustomer
-                          ? "rounded-[16px] rounded-br-sm shadow-sm"
-                          : "rounded-[16px] rounded-bl-sm shadow-sm"
-                      }`}
+                      className="whitespace-pre-wrap break-words rounded-[14px] px-3 py-2 text-[11.5px] leading-[1.45] shadow-sm"
                       style={
                         isCustomer
                           ? {
-                              backgroundColor: whatsappOutgoing,
-                              color: whatsappText,
+                              backgroundColor: waOutgoing,
+                              color: waText,
+                              borderBottomRightRadius: "4px",
                             }
                           : {
-                              backgroundColor: whatsappIncoming,
-                              color: whatsappText,
-                              border: `1px solid ${whatsappBorder}`,
+                              backgroundColor: "#FFFFFF",
+                              color: waText,
+                              border: `1px solid ${waBorder}`,
+                              borderBottomLeftRadius: "4px",
                             }
                       }
                     >
@@ -1623,16 +1581,18 @@ messageRequestActiveRef.current = true;
                     </div>
 
                     <div
-                      className={`mt-1 flex items-center gap-1 px-1 text-[9px] text-slate-400 ${
+                      className={`mt-0.5 flex items-center gap-1 px-1 text-[7.5px] ${
                         isCustomer ? "justify-end" : "justify-start"
                       }`}
+                      style={{ color: waMuted }}
                     >
                       <span>{formatMessageTime(message.createdAt)}</span>
+
                       {isCustomer && (
                         <span
                           className={
                             message.status === "READ"
-                              ? "font-bold text-[#53bdeb]"
+                              ? "font-bold text-[#53BDEB]"
                               : ""
                           }
                         >
@@ -1646,9 +1606,9 @@ messageRequestActiveRef.current = true;
             })}
 
             {sending && (
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-1.5">
                 {config.widget.showAgentAvatars && (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-sm">
+                  <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full border border-white bg-white shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={chatbotAvatar}
@@ -1658,14 +1618,11 @@ messageRequestActiveRef.current = true;
                   </div>
                 )}
 
-                <div className="rounded-[20px] rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                  <p className="mb-2 text-[10px] font-semibold text-slate-500">
-                    {isArabic ? "جاري تحضير الرد..." : "Preparing a response..."}
-                  </p>
-                  <div className="flex gap-1.5">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                <div className="rounded-[14px] rounded-bl-[4px] border border-[#E9EDEF] bg-white px-3 py-2 shadow-sm">
+                  <div className="flex gap-1">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
                   </div>
                 </div>
               </div>
@@ -1678,10 +1635,12 @@ messageRequestActiveRef.current = true;
         {quickReplies.length > 0 &&
           !isConversationClosed &&
           !sending && (
-            <div className="border-t border-slate-100 bg-white px-3.5 py-2.5">
+            <div className="border-t border-[#E9EDEF] bg-white px-3 py-2">
               <div
-                className={`grid gap-2 ${
-                  quickReplies.length > 2 ? "grid-cols-2" : "grid-cols-1"
+                className={`grid gap-1.5 ${
+                  quickReplies.length === 1
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
                 }`}
               >
                 {quickReplies.map((reply, index) => {
@@ -1696,24 +1655,24 @@ messageRequestActiveRef.current = true;
                       type="button"
                       disabled={sending}
                       onClick={() => void sendMessage(reply.value)}
-                      className={`min-h-[38px] rounded-xl border px-3 py-2 text-center text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`min-h-[34px] rounded-lg border px-2.5 py-1.5 text-center text-[9.5px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         isPrimaryConsent
-                          ? "text-white shadow-sm hover:brightness-95"
+                          ? "text-white"
                           : isSecondaryConsent
-                            ? "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
-                            : "bg-white hover:-translate-y-0.5 hover:shadow-sm"
+                            ? "border-slate-200 bg-slate-50 text-slate-500"
+                            : "bg-white hover:bg-emerald-50"
                       }`}
                       style={
                         isPrimaryConsent
                           ? {
-                              backgroundColor: whatsappPrimary,
-                              borderColor: whatsappPrimary,
+                              backgroundColor: waAction,
+                              borderColor: waAction,
                             }
                           : isSecondaryConsent
                             ? undefined
                             : {
                                 borderColor: "rgba(0,168,132,0.35)",
-                                color: whatsappPrimary,
+                                color: waAction,
                               }
                       }
                     >
@@ -1726,56 +1685,57 @@ messageRequestActiveRef.current = true;
           )}
 
         {(showWhatsAppButton || isWaitingForAgent) && canUseWhatsApp && (
-          <div className="border-t border-slate-100 bg-white px-3.5 py-2.5">
+          <div className="border-t border-[#E9EDEF] bg-white px-3 py-2">
             <button
               type="button"
               onClick={openWhatsApp}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-[12px] font-bold text-white shadow-sm transition hover:bg-[#20bd5a]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#20bd5a]"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-5 w-5"
+                className="h-4 w-4"
                 fill="currentColor"
               >
                 <path d="M12 2a9.6 9.6 0 0 0-8.2 14.6L2.5 21.5l5-1.3A9.6 9.6 0 1 0 12 2Zm0 17.4a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3 .8.8-2.9-.2-.3A7.7 7.7 0 1 1 12 19.4Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.2-.3.2-.3.6-1.1.1-.2.1-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.1-.2-.2-.4-.3Z" />
               </svg>
+
               {isArabic ? "المتابعة عبر واتساب" : "Continue on WhatsApp"}
             </button>
           </div>
         )}
 
         {error && conversation && (
-          <div className="border-t border-red-100 bg-red-50 px-4 py-2.5 text-center text-[11px] font-medium text-red-700">
+          <div className="border-t border-red-100 bg-red-50 px-3 py-1.5 text-center text-[8.5px] text-red-700">
             {error}
           </div>
         )}
 
-        <footer className="border-t border-slate-100 bg-white p-2.5">
+        <footer className="border-t border-[#E9EDEF] bg-white p-2">
           {isConversationClosed ? (
-            <div className="space-y-3 rounded-2xl bg-slate-50 p-3">
-              <p className="text-center text-xs font-medium text-slate-500">
+            <div className="space-y-2">
+              <p className="text-center text-[9px] font-medium text-[#667781]">
                 {isArabic
                   ? "تم إغلاق هذه المحادثة."
                   : "This conversation has been closed."}
               </p>
+
               <button
                 type="button"
                 onClick={() => void startNewConversation()}
-                className="w-full rounded-xl px-4 py-3 text-sm font-bold text-white shadow-md transition hover:brightness-95"
-                style={{ backgroundColor: whatsappPrimary }}
+                className="w-full rounded-full bg-[#00A884] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#008f70]"
               >
                 {isArabic ? "بدء محادثة جديدة" : "Start New Chat"}
               </button>
             </div>
           ) : choiceOnlyStep ? (
-            <div className="px-2 py-1.5 text-center text-[10px] font-medium text-slate-400">
+            <p className="py-1 text-center text-[8.5px] font-medium text-[#8696A0]">
               {isArabic
                 ? "اختر أحد الخيارات للمتابعة"
                 : "Select an option to continue"}
-            </div>
+            </p>
           ) : (
-            <form onSubmit={handleSubmit} className="flex items-end gap-2">
-              <div className="flex min-h-11 flex-1 items-end rounded-full border border-slate-200 bg-slate-50 transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+            <form onSubmit={handleSubmit} className="flex items-end gap-1.5">
+              <div className="flex min-h-10 flex-1 items-end rounded-full border border-[#E9EDEF] bg-[#F0F2F5]">
                 <textarea
                   value={input}
                   rows={1}
@@ -1784,9 +1744,9 @@ messageRequestActiveRef.current = true;
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={handleInputKeyDown}
                   placeholder={
-                    isArabic ? "اكتب رسالتك..." : "Type your message..."
+                    isArabic ? "اكتب رسالتك..." : "Type a message..."
                   }
-                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-4 py-2.5 text-[12.5px] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60"
+                  className="max-h-20 min-h-10 flex-1 resize-none bg-transparent px-3.5 py-2.5 text-[10.5px] text-[#111B21] outline-none placeholder:text-[#8696A0] disabled:opacity-60"
                 />
               </div>
 
@@ -1794,12 +1754,11 @@ messageRequestActiveRef.current = true;
                 type="submit"
                 disabled={sending || input.trim().length === 0}
                 aria-label="Send message"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md transition hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ backgroundColor: whatsappPrimary }}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00A884] text-white shadow-sm transition hover:bg-[#008f70] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <svg
                   viewBox="0 0 24 24"
-                  className={`h-5 w-5 ${isArabic ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 ${isArabic ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -1811,13 +1770,10 @@ messageRequestActiveRef.current = true;
             </form>
           )}
 
-          <div
-            className="mt-2 flex items-center justify-center gap-1.5 text-[8.5px] font-medium"
-            style={{ color: whatsappMuted }}
-          >
+          <div className="mt-1.5 flex items-center justify-center gap-1 text-[7.5px] font-medium text-[#8696A0]">
             <svg
               viewBox="0 0 24 24"
-              className="h-3 w-3"
+              className="h-2.5 w-2.5"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -1826,12 +1782,8 @@ messageRequestActiveRef.current = true;
               <path d="M8 10V7a4 4 0 0 1 8 0v3" />
             </svg>
             <span>
-              {isArabic
-                ? "محادثة آمنة وخاصة"
-                : "Secure and private conversation"}
+              {isArabic ? "محادثة آمنة وخاصة" : "Secure & private"}
             </span>
-            <span className="text-slate-300">•</span>
-            <span>{config.company.name}</span>
           </div>
         </footer>
       </section>

@@ -5,21 +5,12 @@ import Script from "next/script";
 
 import {
   Bot,
-  Check,
   CheckCircle2,
-  Code2,
-  Copy,
-  ExternalLink,
   Globe2,
-  Languages,
   MessageCircle,
-  Palette,
   Save,
   Settings2,
-  ShieldCheck,
   Smartphone,
-  Sparkles,
-  Trash2,
 } from "lucide-react";
 
 import { auth } from "@/auth";
@@ -445,15 +436,6 @@ export default async function WebsiteWidgetPage({
   const whatsappHandoffEnabled = settings?.whatsappHandoffEnabled ?? true;
   const enableSound = settings?.enableSound ?? true;
 
-  const whatsappHeader = "rgba(0, 128, 105, 1)";
-  const whatsappPrimary = "rgba(0, 168, 132, 1)";
-  const whatsappLauncher = "rgba(37, 211, 102, 1)";
-  const whatsappOutgoing = "rgba(217, 253, 211, 1)";
-  const whatsappIncoming = "rgba(255, 255, 255, 1)";
-  const whatsappChatBackground = "rgba(239, 234, 226, 1)";
-  const whatsappText = "rgba(17, 27, 33, 1)";
-  const whatsappMuted = "rgba(102, 119, 129, 1)";
-
   const embedPrimaryColor = /^#[0-9a-f]{6}$/i.test(primaryColor)
     ? primaryColor
     : "#25D366";
@@ -475,7 +457,7 @@ export default async function WebsiteWidgetPage({
   window.__websiteEnquiryWidgetLoaded = true;
 
   var widgetUrl = ${inlineScriptValue(widgetUrl)};
-  var widgetColor = ${inlineScriptValue(embedPrimaryColor)};
+  var widgetColor = "#25D366";
   var launcherText = ${inlineScriptValue(embedLauncherText)};
   var widgetSide = ${inlineScriptValue(embedSide)};
 
@@ -492,12 +474,12 @@ export default async function WebsiteWidgetPage({
     frame.setAttribute("allow", "clipboard-write");
     frame.loading = "lazy";
     frame.style.position = "fixed";
-    frame.style.bottom = "78px";
+    frame.style.bottom = "72px";
     frame.style[widgetSide] = "14px";
-    frame.style.width = "min(390px, calc(100vw - 20px))";
-    frame.style.height = "min(650px, calc(100vh - 92px))";
+    frame.style.width = "min(350px, calc(100vw - 16px))";
+    frame.style.height = "min(540px, calc(100vh - 84px))";
     frame.style.border = "0";
-    frame.style.borderRadius = "24px";
+    frame.style.borderRadius = "22px";
     frame.style.background = "transparent";
     frame.style.zIndex = "2147483000";
     frame.style.display = "none";
@@ -510,17 +492,17 @@ export default async function WebsiteWidgetPage({
     launcher.setAttribute("aria-label", launcherText);
     launcher.setAttribute("aria-expanded", "false");
     launcher.style.position = "fixed";
-    launcher.style.bottom = "16px";
-    launcher.style[widgetSide] = "16px";
-    launcher.style.minHeight = "50px";
+    launcher.style.bottom = "14px";
+    launcher.style[widgetSide] = "14px";
+    launcher.style.minHeight = "46px";
     launcher.style.maxWidth = "calc(100vw - 36px)";
-    launcher.style.padding = "0 20px";
+    launcher.style.padding = "0 16px";
     launcher.style.border = "0";
     launcher.style.borderRadius = "999px";
     launcher.style.background = widgetColor;
     launcher.style.color = "#ffffff";
     launcher.style.fontFamily = "Arial, sans-serif";
-    launcher.style.fontSize = "14px";
+    launcher.style.fontSize = "12px";
     launcher.style.fontWeight = "700";
     launcher.style.cursor = "pointer";
     launcher.style.boxShadow = "0 14px 40px rgba(15,23,42,0.24)";
@@ -563,62 +545,43 @@ export default async function WebsiteWidgetPage({
 </script>`;
 
   return (
-    <main className="min-h-full bg-slate-50/70 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1500px]">
-        <section className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8 lg:px-10 lg:py-8">
-          <div
-            className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full opacity-[0.08] blur-2xl"
-            style={{ backgroundColor: whatsappPrimary }}
-          />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">
-                <Sparkles className="h-3.5 w-3.5" />
-                Website Experience
-              </div>
+    <main className="px-5 py-8 sm:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600">
+              WhatsApp CRM
+            </p>
 
-              <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Website Widget
-              </h1>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
+              Website Widget
+            </h1>
 
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-[15px]">
-                Personalise your enquiry chatbot, control where it can load,
-                preview the experience, and copy the production embed code.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={widgetUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Preview Widget
-              </a>
-
-              <button
-                type="submit"
-                form="widget-settings-form"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800"
-              >
-                <Save className="h-4 w-4" />
-                Save Changes
-              </button>
-            </div>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+              Edit your website chatbot settings, manage allowed domains and
+              copy the website embed code.
+            </p>
           </div>
-        </section>
+
+          <a
+            href={`/widget/${company.widgetKey}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Test Widget
+          </a>
+        </div>
 
         {params.saved === "1" && (
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-800">
-            <CheckCircle2 className="h-5 w-5 shrink-0" />
+          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
             Widget settings saved successfully.
           </div>
         )}
 
         {params.error && (
-          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700">
+          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700">
             {params.error === "required"
               ? "Launcher text and welcome message are required."
               : params.error === "color"
@@ -627,71 +590,69 @@ export default async function WebsiteWidgetPage({
           </div>
         )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MiniStat
-            icon={<CheckCircle2 className="h-5 w-5" />}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatusCard
             title="Widget Status"
             value={isActive ? "Active" : "Inactive"}
-            accentClass="bg-emerald-50 text-emerald-700"
+            icon={<CheckCircle2 className="h-5 w-5" />}
           />
-          <MiniStat
+
+          <StatusCard
+            title="Bot"
+            value={company.botEnabled ? "Enabled" : "Disabled"}
             icon={<Bot className="h-5 w-5" />}
-            title="Automation"
-            value={company.botEnabled ? "Bot Enabled" : "Bot Disabled"}
-            accentClass="bg-sky-50 text-sky-700"
           />
-          <MiniStat
-            icon={<Languages className="h-5 w-5" />}
-            title="Languages"
+
+          <StatusCard
+            title="Language"
             value={enableArabic ? "English + Arabic" : "English"}
-            accentClass="bg-violet-50 text-violet-700"
+            icon={<Globe2 className="h-5 w-5" />}
           />
-          <MiniStat
-            icon={<Smartphone className="h-5 w-5" />}
-            title="Placement"
+
+          <StatusCard
+            title="Position"
             value={
               settings?.position === "BOTTOM_LEFT"
                 ? "Bottom Left"
                 : "Bottom Right"
             }
-            accentClass="bg-amber-50 text-amber-700"
+            icon={<Smartphone className="h-5 w-5" />}
           />
         </div>
 
-        <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)]">
-          <form
-            id="widget-settings-form"
-            action={saveWidgetSettings}
-            className="space-y-6"
-          >
-            <div className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
-                  <Palette className="h-5 w-5" />
+        <form
+          action={saveWidgetSettings}
+          className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]"
+        >
+          <div className="space-y-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                  <Settings2 className="h-5 w-5" />
                 </div>
+
                 <div>
-                  <h2 className="text-xl font-bold text-slate-950">
-                    Appearance & Branding
+                  <h2 className="text-lg font-bold text-slate-950">
+                    Edit Widget Settings
                   </h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    Shape the first impression visitors see when the chat opens.
+                  <p className="text-sm text-slate-500">
+                    Changes are saved directly to the existing widget settings
+                    record.
                   </p>
                 </div>
               </div>
 
-              <div className="mt-7 grid gap-5 sm:grid-cols-2">
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 <Field
                   label="Display Name"
                   name="displayName"
                   defaultValue={displayName}
-                  hint="Shown in the chat header"
                 />
 
                 <Field
                   label="Subtitle"
                   name="subtitle"
                   defaultValue={subtitle}
-                  hint="Short response or availability message"
                 />
 
                 <Field
@@ -699,408 +660,220 @@ export default async function WebsiteWidgetPage({
                   name="launcherText"
                   defaultValue={launcherText}
                   required
-                  hint="Text shown on the website launcher"
                 />
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
                     Primary Color
                   </label>
-                  <div className="flex h-[50px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 shadow-sm">
+
+                  <div className="flex items-center gap-3">
                     <input
                       type="color"
                       name="primaryColor"
                       defaultValue={primaryColor}
-                      className="h-9 w-12 cursor-pointer rounded-xl border-0 bg-transparent p-0"
+                      className="h-11 w-16 cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
                     />
-                    <div
-                      className="h-7 w-7 rounded-full ring-4 ring-slate-100"
-                      style={{ backgroundColor: whatsappPrimary }}
-                    />
-                    <span className="font-mono text-sm font-semibold text-slate-700">
-                      {primaryColor}
-                    </span>
+
+                    <div className="flex h-11 flex-1 items-center rounded-xl border border-slate-200 bg-slate-50 px-4">
+                      <span className="text-sm font-semibold text-slate-600">
+                        Current: {primaryColor}
+                      </span>
+                    </div>
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-slate-400">
-                    Used for the external website launcher. The chat itself uses the WhatsApp-style palette.
-                  </p>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
                     Widget Position
                   </label>
+
                   <select
                     name="position"
                     defaultValue={settings?.position ?? "BOTTOM_RIGHT"}
-                    className="h-[50px] w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800"
                   >
                     <option value="BOTTOM_RIGHT">Bottom Right</option>
                     <option value="BOTTOM_LEFT">Bottom Left</option>
                   </select>
-                  <p className="mt-2 text-xs leading-5 text-slate-400">
-                    Choose which side of the website shows the launcher.
-                  </p>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
                     Default Language
                   </label>
+
                   <select
                     name="defaultLanguage"
                     defaultValue={settings?.defaultLanguage ?? "en"}
-                    className="h-[50px] w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800"
                   >
                     <option value="en">English</option>
                     <option value="ar">Arabic</option>
                   </select>
-                  <p className="mt-2 text-xs leading-5 text-slate-400">
-                    Visitors can still choose another enabled language.
-                  </p>
                 </div>
+
+                <Field
+                  label="WhatsApp Handoff Number"
+                  name="whatsappHandoffNumber"
+                  defaultValue={settings?.whatsappHandoffNumber ?? ""}
+                  placeholder="+971..."
+                />
               </div>
 
               <div className="mt-5">
-                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
                   Welcome Message
                 </label>
+
                 <textarea
                   name="welcomeMessage"
                   defaultValue={welcomeMessage}
                   required
                   rows={4}
-                  className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm leading-6 text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-800 outline-none focus:border-emerald-400"
                 />
-                <p className="mt-2 text-xs leading-5 text-slate-400">
-                  Keep this warm and concise so visitors know what to do next.
-                </p>
               </div>
-            </div>
+            </section>
 
-            <div className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-                  <Settings2 className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-slate-950">
-                    Behaviour & Data Capture
-                  </h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    Control automation, visitor details, handoff and sound.
-                  </p>
-                </div>
-              </div>
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+              <h2 className="text-lg font-bold text-slate-950">Behaviour</h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Enable or disable the chatbot features.
+              </p>
 
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <Toggle
                   name="isActive"
                   label="Widget Active"
                   description="Allow visitors to use the website chatbot."
                   defaultChecked={isActive}
                 />
+
                 <Toggle
                   name="botEnabled"
                   label="Bot Enabled"
                   description="Allow the chatbot to answer automatically."
                   defaultChecked={company.botEnabled}
                 />
+
                 <Toggle
                   name="enableArabic"
                   label="Enable Arabic"
-                  description="Offer Arabic as a conversation language."
+                  description="Allow Arabic language support."
                   defaultChecked={enableArabic}
                 />
-                <Toggle
-                  name="enableSound"
-                  label="Widget Sound"
-                  description="Play notification sounds inside the widget."
-                  defaultChecked={enableSound}
-                />
+
                 <Toggle
                   name="collectName"
                   label="Collect Name"
                   description="Ask the visitor for their name."
                   defaultChecked={collectName}
                 />
+
                 <Toggle
                   name="collectPhone"
                   label="Collect Phone"
-                  description="Ask for a visitor contact number."
+                  description="Ask for the visitor phone number."
                   defaultChecked={collectPhone}
                 />
+
                 <Toggle
                   name="collectEmail"
                   label="Collect Email"
-                  description="Ask for an email address when enabled."
+                  description="Ask for the visitor email address."
                   defaultChecked={collectEmail}
                 />
+
                 <Toggle
                   name="requireConsent"
                   label="Require Consent"
-                  description="Ask permission before capturing enquiry details."
+                  description="Ask permission before collecting details."
                   defaultChecked={requireConsent}
                 />
+
                 <Toggle
                   name="humanHandoffEnabled"
                   label="Marketing Executive Handoff"
-                  description="Transfer qualified enquiries to the CRM team."
+                  description="Transfer enquiries to the CRM team."
                   defaultChecked={humanHandoffEnabled}
                 />
+
                 <Toggle
                   name="whatsappHandoffEnabled"
                   label="WhatsApp Handoff"
-                  description="Allow visitors to continue in WhatsApp."
+                  description="Allow Continue on WhatsApp."
                   defaultChecked={whatsappHandoffEnabled}
                 />
+
+                <Toggle
+                  name="enableSound"
+                  label="Widget Sound"
+                  description="Enable widget notification sound."
+                  defaultChecked={enableSound}
+                />
+              </div>
+            </section>
+
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+            >
+              <Save className="h-4 w-4" />
+              Save Settings
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-950">
+                Widget Information
+              </h2>
+
+              <div className="mt-6">
+                <CodeField label="Widget Key" value={company.widgetKey} />
               </div>
 
               <div className="mt-5">
-                <Field
-                  label="WhatsApp Handoff Number"
-                  name="whatsappHandoffNumber"
-                  defaultValue={settings?.whatsappHandoffNumber ?? ""}
-                  placeholder="+971..."
-                  hint="Used only when Continue on WhatsApp is enabled"
-                />
+                <CodeField label="Widget URL" value={widgetUrl} />
               </div>
+            </section>
 
-              <div className="mt-7 flex flex-wrap gap-3 border-t border-slate-100 pt-6">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-95"
-                  style={{ backgroundColor: whatsappPrimary }}
-                >
-                  <Save className="h-4 w-4" />
-                  Save Widget Settings
-                </button>
+            <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+              <h3 className="font-bold text-emerald-900">Current Setup</h3>
+              <p className="mt-2 text-sm leading-6 text-emerald-800">
+                Saving this form updates the existing Company and WidgetSettings
+                records. Allowed domains are managed separately below.
+              </p>
+            </section>
+          </div>
+        </form>
 
-                <a
-                  href={widgetUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Open Live Widget
-                </a>
-              </div>
-            </div>
-          </form>
+        <div className="mt-8 grid gap-6 xl:grid-cols-2">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+            <h2 className="text-xl font-bold text-slate-950">
+              Allowed Domains
+            </h2>
 
-          <aside className="xl:sticky xl:top-6 xl:self-start">
-            <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.10)]">
-              <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-600">
-                    Live Preview
-                  </p>
-                  <h2 className="mt-1 text-lg font-bold text-slate-950">
-                    Visitor Experience
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Preview
-                </div>
-              </div>
-
-              <div className="relative min-h-[650px] overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4 sm:p-7">
-                <div className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,rgba(34,197,94,0.16)_1px,transparent_0)] [background-size:22px_22px]" />
-
-                <div className="relative mx-auto overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_28px_80px_rgba(15,23,42,0.18)] backdrop-blur">
-                  <div
-                    className="relative overflow-hidden px-5 py-5 text-white"
-                    style={{
-                      background: `linear-gradient(135deg, ${whatsappHeader} 0%, rgba(0,112,92,1) 55%, rgba(0,92,75,1) 100%)`,
-                    }}
-                  >
-                    <div className="absolute -right-8 -top-12 h-32 w-32 rounded-full bg-white/10" />
-                    <div className="relative flex items-center gap-3">
-                      <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/25 bg-white/15 text-lg font-black backdrop-blur">
-                        {displayName.trim().charAt(0).toUpperCase() || "C"}
-                        <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white" style={{ backgroundColor: whatsappLauncher }} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-bold">{displayName}</p>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-white/85">
-                          <span className="h-2 w-2 rounded-full bg-emerald-200 ring-4 ring-white/10" />
-                          <span className="truncate">{subtitle}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="min-h-[390px] space-y-4 px-4 py-5" style={{ backgroundColor: whatsappChatBackground }}>
-                    <div className="mx-auto w-fit rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 shadow-sm">
-                      Today
-                    </div>
-
-                    <div className="flex items-end gap-2">
-                      <div
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm"
-                        style={{ backgroundColor: whatsappPrimary }}
-                      >
-                        {displayName.trim().charAt(0).toUpperCase() || "C"}
-                      </div>
-                      <div
-                        className="max-w-[82%] rounded-[16px] rounded-bl-sm px-4 py-3 text-sm leading-6 shadow-sm"
-                        style={{
-                          backgroundColor: whatsappIncoming,
-                          color: whatsappText,
-                        }}
-                      >
-                        {welcomeMessage}
-                        <p className="mt-1.5 text-right text-[9px] text-slate-400">
-                          10:30 AM
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800 shadow-sm">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-xs font-bold text-white">ME</div>
-                      <div>
-                        <p className="font-bold">Marketing Executive</p>
-                        <p className="text-[10px] text-emerald-700">Online and ready to assist</p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <div
-                        className="max-w-[76%] rounded-[16px] rounded-br-sm px-4 py-3 text-sm leading-6 shadow-sm"
-                        style={{
-                          backgroundColor: whatsappOutgoing,
-                          color: whatsappText,
-                        }}
-                      >
-                        I would like to know more about your programmes.
-                        <p className="mt-1.5 text-right text-[9px]" style={{ color: whatsappMuted }}>
-                          10:31 AM ✓✓
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-end gap-2">
-                      <div
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white shadow-sm"
-                        style={{ backgroundColor: whatsappPrimary }}
-                      >
-                        {displayName.trim().charAt(0).toUpperCase() || "C"}
-                      </div>
-                      <div
-                        className="max-w-[82%] rounded-[16px] rounded-bl-sm px-4 py-3 text-sm leading-6 shadow-sm"
-                        style={{
-                          backgroundColor: whatsappIncoming,
-                          color: whatsappText,
-                        }}
-                      >
-                        Of course. I can help with programmes, fees, admissions
-                        or connect you with a Marketing Executive.
-                        <p className="mt-1.5 text-right text-[9px] text-slate-400">
-                          10:31 AM
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      {["Programmes", "Fees & duration", "Admission", "Marketing Executive"].map(
-                        (label) => (
-                          <div
-                            key={label}
-                            className="rounded-xl border bg-white px-3 py-2.5 text-center text-[11px] font-bold shadow-sm"
-                            style={{
-                              borderColor: "rgba(0,168,132,0.35)",
-                              color: whatsappPrimary,
-                            }}
-                          >
-                            {label}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-100 bg-white p-3">
-                    <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-                      <span className="flex-1 text-xs text-slate-400">
-                        Type your message...
-                      </span>
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm"
-                        style={{ backgroundColor: whatsappPrimary }}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="m22 2-7 20-4-9-9-4Z" />
-                          <path d="M22 2 11 13" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-center gap-1 text-[9px] font-medium text-slate-400">
-                      <ShieldCheck className="h-3 w-3" />
-                      Secure and private conversation
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className={`relative mt-5 flex ${
-                    settings?.position === "BOTTOM_LEFT"
-                      ? "justify-start"
-                      : "justify-end"
-                  }`}
-                >
-                  <div
-                    className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white shadow-[0_16px_34px_rgba(15,23,42,0.18)]"
-                    style={{ backgroundColor: whatsappPrimary }}
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    {launcherText}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-        </section>
-
-        <section className="mt-6 grid gap-6 xl:grid-cols-2">
-          <div className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
-                <Globe2 className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-950">
-                  Allowed Domains
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  The widget can only load from websites listed here.
-                </p>
-              </div>
-            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Add each website hostname that is allowed to load this widget. If
+              a site uses both www and non-www versions, add both.
+            </p>
 
             {params.domain === "added" && (
-              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 Domain added successfully.
               </div>
             )}
 
             {params.domain === "removed" && (
-              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 Domain removed successfully.
               </div>
             )}
 
             {params.domainError && (
-              <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {params.domainError === "invalid"
                   ? "Enter a valid domain, for example uca.feuc.ae."
                   : params.domainError === "company"
@@ -1111,124 +884,89 @@ export default async function WebsiteWidgetPage({
 
             <form
               action={addAllowedDomain}
-              className="mt-6 flex flex-col gap-3 sm:flex-row"
+              className="mt-5 flex flex-col gap-3 sm:flex-row"
             >
-              <div className="relative flex-1">
-                <Globe2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  name="domain"
-                  required
-                  placeholder="example.com"
-                  className="h-12 w-full rounded-2xl border border-slate-200 pl-11 pr-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
-                />
-              </div>
+              <input
+                type="text"
+                name="domain"
+                required
+                placeholder="example.com"
+                className="h-11 flex-1 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-400"
+              />
 
               <button
                 type="submit"
-                className="h-12 rounded-2xl bg-slate-950 px-5 text-sm font-bold text-white transition hover:bg-slate-800"
+                className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
               >
                 Add Domain
               </button>
             </form>
 
-            <div className="mt-5 space-y-2.5">
+            <div className="mt-5 space-y-2">
               {company.widgetDomains.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center">
-                  <Globe2 className="mx-auto h-6 w-6 text-slate-300" />
-                  <p className="mt-2 text-sm font-semibold text-slate-500">
-                    No production domain is allowed yet.
-                  </p>
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                  No production domain is allowed yet.
                 </div>
               ) : (
                 company.widgetDomains.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3.5"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3"
                   >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm">
-                        <Check className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <code className="block truncate text-sm font-semibold text-slate-700">
-                          {item.domain}
-                        </code>
-                        <p className="mt-0.5 text-[11px] font-semibold text-emerald-600">
-                          Active
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <code className="break-all text-sm font-semibold text-slate-700">
+                        {item.domain}
+                      </code>
+                      <p className="mt-1 text-xs font-semibold text-emerald-600">
+                        Active
+                      </p>
                     </div>
 
                     <form action={removeAllowedDomain}>
-                      <input type="hidden" name="domainId" value={item.id} />
+                      <input
+                        type="hidden"
+                        name="domainId"
+                        value={item.id}
+                      />
+
                       <button
                         type="submit"
-                        title="Remove domain"
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-100 bg-white text-red-500 transition hover:bg-red-50"
+                        className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Remove
                       </button>
                     </form>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
-                <Code2 className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-950">
-                  Embed Code
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Paste this snippet before the closing body tag on an approved
-                  website.
-                </p>
-              </div>
-            </div>
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+            <h2 className="text-xl font-bold text-slate-950">Embed Code</h2>
 
-            <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                  HTML / JavaScript
-                </span>
-              </div>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Add the website to Allowed Domains first. Then paste this code
+              before the closing &lt;/body&gt; tag of that website.
+            </p>
 
-              <textarea
-                id="widget-embed-code"
-                readOnly
-                value={embedCode}
-                rows={15}
-                className="w-full resize-y border-0 bg-transparent p-4 font-mono text-[11px] leading-6 text-emerald-300 outline-none"
-              />
-            </div>
+            <textarea
+              id="widget-embed-code"
+              readOnly
+              value={embedCode}
+              rows={18}
+              className="mt-5 w-full resize-y rounded-2xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-6 text-emerald-300 outline-none"
+            />
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs leading-5 text-slate-400">
-                Widget key: <span className="font-mono">{company.widgetKey}</span>
-              </p>
-
-              <button
-                type="button"
-                data-copy-widget-code
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800"
-              >
-                <Copy className="h-4 w-4" />
-                Copy Embed Code
-              </button>
-            </div>
-          </div>
-        </section>
+            <button
+              type="button"
+              data-copy-widget-code
+              className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+            >
+              Copy Embed Code
+            </button>
+          </section>
+        </div>
 
         <Script id="widget-copy-code-handler" strategy="afterInteractive">
           {`
@@ -1259,7 +997,7 @@ export default async function WebsiteWidgetPage({
                   button.textContent = "Copied!";
 
                   window.setTimeout(function () {
-                    button.innerHTML = "Copy Embed Code";
+                    button.textContent = "Copy Embed Code";
                   }, 1600);
                 } catch {
                   field.focus();
@@ -1274,32 +1012,27 @@ export default async function WebsiteWidgetPage({
   );
 }
 
-function MiniStat({
-  icon,
+function StatusCard({
   title,
   value,
-  accentClass,
+  icon,
 }: {
-  icon: React.ReactNode;
   title: string;
   value: string;
-  accentClass: string;
+  icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accentClass}`}
-        >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
           {icon}
         </div>
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
             {title}
           </p>
-          <p className="mt-1 truncate text-sm font-bold text-slate-900">
-            {value}
-          </p>
+          <p className="mt-1 text-sm font-bold text-slate-900">{value}</p>
         </div>
       </div>
     </div>
@@ -1312,18 +1045,16 @@ function Field({
   defaultValue,
   placeholder,
   required = false,
-  hint,
 }: {
   label: string;
   name: string;
   defaultValue: string;
   placeholder?: string;
   required?: boolean;
-  hint?: string;
 }) {
   return (
     <div>
-      <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+      <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
         {label}
       </label>
 
@@ -1332,12 +1063,8 @@ function Field({
         defaultValue={defaultValue}
         placeholder={placeholder}
         required={required}
-        className="h-[50px] w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50"
+        className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-400"
       />
-
-      {hint && (
-        <p className="mt-2 text-xs leading-5 text-slate-400">{hint}</p>
-      )}
     </div>
   );
 }
@@ -1354,24 +1081,42 @@ function Toggle({
   defaultChecked: boolean;
 }) {
   return (
-    <label className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40">
-      <span className="relative mt-0.5 inline-flex h-6 w-11 shrink-0">
-        <input
-          type="checkbox"
-          name={name}
-          defaultChecked={defaultChecked}
-          className="peer sr-only"
-        />
-        <span className="absolute inset-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald-500" />
-        <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
-      </span>
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40">
+      <input
+        type="checkbox"
+        name={name}
+        defaultChecked={defaultChecked}
+        className="mt-1 h-4 w-4 accent-emerald-600"
+      />
 
-      <span className="min-w-0">
+      <span>
         <span className="block text-sm font-bold text-slate-900">{label}</span>
         <span className="mt-1 block text-xs leading-5 text-slate-500">
           {description}
         </span>
       </span>
     </label>
+  );
+}
+
+function CodeField({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+        {label}
+      </p>
+
+      <div className="overflow-x-auto rounded-2xl bg-slate-950 px-4 py-4">
+        <code className="whitespace-nowrap text-xs text-emerald-300">
+          {value}
+        </code>
+      </div>
+    </div>
   );
 }
