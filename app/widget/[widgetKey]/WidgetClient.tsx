@@ -1330,8 +1330,7 @@ messageRequestActiveRef.current = true;
     );
   }
 
-  const chatbotAvatar =
-    config.company.logoUrl || "/images/chatbot-avatar.png";
+  const chatbotAvatar = "/chatbot.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
