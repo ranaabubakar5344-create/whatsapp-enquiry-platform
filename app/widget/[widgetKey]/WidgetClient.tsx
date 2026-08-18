@@ -383,7 +383,6 @@ export default function WidgetClient({
     useState<ConversationData | null>(null);
 
   const [messages, setMessages] =
-
     useState<ChatMessage[]>([]);
 
   const [input, setInput] = useState("");
@@ -451,6 +450,8 @@ export default function WidgetClient({
   const whatsappText = "rgba(17, 27, 33, 1)"; // #111B21
   const whatsappMuted = "rgba(102, 119, 129, 1)"; // #667781
   const whatsappBorder = "rgba(233, 237, 239, 1)"; // #E9EDEF
+  const chatbotAvatar =
+    config?.company?.logoUrl || "/chatbot.png";
 
   const whatsappNumber = useMemo(
     () =>
@@ -1335,7 +1336,7 @@ messageRequestActiveRef.current = true;
 
   const companyInitial =
     config.company.name.trim().charAt(0).toUpperCase() || "C";
-const chatbotAvatar = "/chatbot.png";
+
   const agentInitial =
     conversation?.assignedAgent?.name
       ?.trim()
@@ -1346,11 +1347,11 @@ const chatbotAvatar = "/chatbot.png";
     <div
       dir={isArabic ? "rtl" : "ltr"}
       onPointerDownCapture={handleFirstWidgetInteraction}
-      className="flex min-h-screen items-center justify-center bg-transparent p-2 font-sans sm:p-4"
+      className="flex min-h-screen items-center justify-center bg-transparent p-1.5 font-sans sm:p-2"
     >
-      <section className="relative flex h-[min(748px,calc(100vh-16px))] w-full max-w-[430px] flex-col overflow-hidden rounded-[30px] border border-slate-200/80 bg-white shadow-[0_34px_100px_rgba(15,23,42,0.24)]">
+      <section className="relative flex h-[min(640px,calc(100vh-10px))] w-full max-w-[390px] flex-col overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
         <header
-          className="relative overflow-hidden px-5 pb-5 pt-5 text-white"
+          className="relative overflow-hidden px-4 pb-3.5 pt-4 text-white"
           style={{
             background: `linear-gradient(135deg, ${whatsappHeader} 0%, rgba(0, 112, 92, 1) 55%, rgba(0, 92, 75, 1) 100%)`,
           }}
@@ -1361,44 +1362,30 @@ const chatbotAvatar = "/chatbot.png";
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent" />
 
           <div className="relative flex items-center gap-3">
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-white/15 text-lg font-black shadow-sm backdrop-blur">
-            <img
-  src={chatbotAvatar}
-  alt="Chat Support"
-  className="h-full w-full object-cover"
-/>
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/15 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={chatbotAvatar}
+                alt={config.widget.displayName}
+                className="h-full w-full object-cover"
+              />
 
               {config.widget.showOnlineStatus && (
-                <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white" style={{ backgroundColor: whatsappLauncher }} />
+                <span
+                  className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white"
+                  style={{ backgroundColor: whatsappLauncher }}
+                />
               )}
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-[15px] font-bold">
+                <h1 className="truncate text-[14px] font-bold">
                   {config.widget.displayName}
                 </h1>
-               <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/70 shadow-sm">
-  <img
-    src="/chatbot.png"
-    alt="Support Agent"
-    className="h-full w-full object-cover"
-  />
-</div>
-                <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-3 w-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                  >
-                    <path d="m5 12 4 4L19 6" />
-                  </svg>
-                </span>
               </div>
 
-              <div className="mt-1 flex items-center gap-2 text-[11px] font-medium text-white/85">
+              <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-white/85">
                 {config.widget.showOnlineStatus && (
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-200 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
                 )}
@@ -1427,7 +1414,7 @@ const chatbotAvatar = "/chatbot.png";
                   : "Start new conversation"
               }
               aria-label="Start new conversation"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 transition hover:bg-white/20"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 transition hover:bg-white/20"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1442,7 +1429,7 @@ const chatbotAvatar = "/chatbot.png";
             </button>
           </div>
 
-          <div className="relative mt-4 flex items-center gap-2 text-[10px] font-medium text-white/75">
+          <div className="relative mt-3 flex items-center gap-1.5 text-[9px] font-medium text-white/75">
             <svg
               viewBox="0 0 24 24"
               className="h-3.5 w-3.5"
@@ -1462,7 +1449,7 @@ const chatbotAvatar = "/chatbot.png";
         </header>
 
         {isWaitingForAgent && (
-          <div className="border-b border-amber-100 bg-amber-50/95 px-4 py-3">
+          <div className="border-b border-amber-100 bg-amber-50/95 px-3 py-2.5">
             <div className="flex gap-3">
               <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
                 <svg
@@ -1490,12 +1477,12 @@ const chatbotAvatar = "/chatbot.png";
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => void startNewConversation()}
                 disabled={loading}
-                className="rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-[11px] font-bold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
               >
                 {isArabic ? "محادثة جديدة" : "New Chat"}
               </button>
@@ -1504,7 +1491,7 @@ const chatbotAvatar = "/chatbot.png";
                 <button
                   type="button"
                   onClick={openWhatsApp}
-                  className="rounded-xl bg-[#25D366] px-3 py-2.5 text-xs font-bold text-white transition hover:bg-[#20bd5a]"
+                  className="rounded-xl bg-[#25D366] px-3 py-2 text-[11px] font-bold text-white transition hover:bg-[#20bd5a]"
                 >
                   {isArabic ? "فتح واتساب" : "Open WhatsApp"}
                 </button>
@@ -1534,7 +1521,7 @@ const chatbotAvatar = "/chatbot.png";
         )}
 
         <div
-          className="relative flex-1 overflow-y-auto px-4 py-5"
+          className="relative flex-1 overflow-y-auto px-3.5 py-4"
           style={{
             backgroundColor: whatsappChatBackground,
             backgroundImage:
@@ -1542,37 +1529,11 @@ const chatbotAvatar = "/chatbot.png";
             backgroundSize: "22px 22px",
           }}
         >
-          <div className="mx-auto mb-5 w-fit rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 shadow-sm backdrop-blur">
+          <div className="mx-auto mb-4 w-fit rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400 shadow-sm backdrop-blur">
             {isArabic ? "اليوم" : "Today"}
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-[22px] border border-white/70 bg-white/90 p-3 shadow-sm backdrop-blur">
-              <div className="flex items-start gap-3">
-                <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-sm font-black text-white shadow-sm"
-                  style={{ backgroundColor: whatsappPrimary }}
-                >
-                 <img
-  src={chatbotAvatar}
-  alt="Chat Support"
-  className="h-full w-full object-cover"
-/>
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900">
-                    {config.widget.displayName}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
-                    {isArabic
-                      ? "مرحباً! نحن هنا لمساعدتك في البرامج، الرسوم، القبول، أو تحويلك إلى مسؤول التسويق."
-                      : "Hi! I can help with programmes, fees, admission and connect you with a Marketing Executive."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
+          <div className="space-y-3.5">
             {messages.map((message) => {
               const isCustomer = message.sender === "CUSTOMER";
               const isSystem = message.sender === "SYSTEM";
@@ -1609,34 +1570,38 @@ const chatbotAvatar = "/chatbot.png";
                 >
                   {!isCustomer && config.widget.showAgentAvatars && (
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[11px] font-bold text-white shadow-sm"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white text-[10px] font-bold text-white shadow-sm"
                       style={{ backgroundColor: whatsappPrimary }}
                     >
                       {message.sender === "AGENT" ? (
-  <img
-    src="/chatbot.png"
-    alt="Marketing Executive"
-    className="h-full w-full object-cover"
-  />
-) : (
-  <img
-    src="/chatbot.png"
-    alt="Chat Support"
-    className="h-full w-full object-cover"
-  />
-)}
+                        (
+                          message.senderUser?.name ??
+                          conversation?.assignedAgent?.name ??
+                          "A"
+                        )
+                          .trim()
+                          .charAt(0)
+                          .toUpperCase()
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={chatbotAvatar}
+                          alt={config.widget.displayName}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
                     </div>
                   )}
 
-                  <div className="max-w-[82%]">
-                    {!isCustomer && (
-                      <p className="mb-1.5 px-1 text-[10px] font-bold text-slate-500">
+                  <div className="max-w-[80%]">
+                    {message.sender === "AGENT" && (
+                      <p className="mb-1 px-1 text-[10px] font-bold text-slate-500">
                         {senderName}
                       </p>
                     )}
 
                     <div
-                      className={`whitespace-pre-wrap break-words px-4 py-3 text-[13px] leading-6 ${
+                      className={`whitespace-pre-wrap break-words px-3.5 py-2.5 text-[12.5px] leading-5 ${
                         isCustomer
                           ? "rounded-[16px] rounded-br-sm shadow-sm"
                           : "rounded-[16px] rounded-bl-sm shadow-sm"
@@ -1683,11 +1648,13 @@ const chatbotAvatar = "/chatbot.png";
             {sending && (
               <div className="flex items-end gap-2">
                 {config.widget.showAgentAvatars && (
-                  <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold text-white"
-                    style={{ backgroundColor: whatsappPrimary }}
-                  >
-                    {companyInitial}
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={chatbotAvatar}
+                      alt={config.widget.displayName}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 )}
 
@@ -1711,11 +1678,7 @@ const chatbotAvatar = "/chatbot.png";
         {quickReplies.length > 0 &&
           !isConversationClosed &&
           !sending && (
-            <div className="border-t border-slate-100 bg-white px-4 py-3">
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                {isArabic ? "ردود سريعة" : "Quick replies"}
-              </p>
-
+            <div className="border-t border-slate-100 bg-white px-3.5 py-2.5">
               <div
                 className={`grid gap-2 ${
                   quickReplies.length > 2 ? "grid-cols-2" : "grid-cols-1"
@@ -1733,7 +1696,7 @@ const chatbotAvatar = "/chatbot.png";
                       type="button"
                       disabled={sending}
                       onClick={() => void sendMessage(reply.value)}
-                      className={`min-h-[42px] rounded-xl border px-3 py-2.5 text-center text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`min-h-[38px] rounded-xl border px-3 py-2 text-center text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         isPrimaryConsent
                           ? "text-white shadow-sm hover:brightness-95"
                           : isSecondaryConsent
@@ -1763,11 +1726,11 @@ const chatbotAvatar = "/chatbot.png";
           )}
 
         {(showWhatsAppButton || isWaitingForAgent) && canUseWhatsApp && (
-          <div className="border-t border-slate-100 bg-white px-4 py-3">
+          <div className="border-t border-slate-100 bg-white px-3.5 py-2.5">
             <button
               type="button"
               onClick={openWhatsApp}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#20bd5a]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-[12px] font-bold text-white shadow-sm transition hover:bg-[#20bd5a]"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1787,7 +1750,7 @@ const chatbotAvatar = "/chatbot.png";
           </div>
         )}
 
-        <footer className="border-t border-slate-100 bg-white p-3">
+        <footer className="border-t border-slate-100 bg-white p-2.5">
           {isConversationClosed ? (
             <div className="space-y-3 rounded-2xl bg-slate-50 p-3">
               <p className="text-center text-xs font-medium text-slate-500">
@@ -1805,14 +1768,14 @@ const chatbotAvatar = "/chatbot.png";
               </button>
             </div>
           ) : choiceOnlyStep ? (
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-[11px] font-medium text-slate-500">
+            <div className="px-2 py-1.5 text-center text-[10px] font-medium text-slate-400">
               {isArabic
-                ? "يرجى اختيار أحد الخيارات أعلاه."
-                : "Choose one of the options above to continue."}
+                ? "اختر أحد الخيارات للمتابعة"
+                : "Select an option to continue"}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
-              <div className="flex min-h-12 flex-1 items-end rounded-2xl border border-slate-200 bg-slate-50 transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
+              <div className="flex min-h-11 flex-1 items-end rounded-full border border-slate-200 bg-slate-50 transition focus-within:border-slate-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-slate-100">
                 <textarea
                   value={input}
                   rows={1}
@@ -1823,7 +1786,7 @@ const chatbotAvatar = "/chatbot.png";
                   placeholder={
                     isArabic ? "اكتب رسالتك..." : "Type your message..."
                   }
-                  className="max-h-28 min-h-12 flex-1 resize-none bg-transparent px-4 py-3 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60"
+                  className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-4 py-2.5 text-[12.5px] text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60"
                 />
               </div>
 
@@ -1831,7 +1794,7 @@ const chatbotAvatar = "/chatbot.png";
                 type="submit"
                 disabled={sending || input.trim().length === 0}
                 aria-label="Send message"
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg transition hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md transition hover:-translate-y-0.5 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                 style={{ backgroundColor: whatsappPrimary }}
               >
                 <svg
@@ -1849,7 +1812,7 @@ const chatbotAvatar = "/chatbot.png";
           )}
 
           <div
-            className="mt-2.5 flex items-center justify-center gap-1.5 text-[9px] font-medium"
+            className="mt-2 flex items-center justify-center gap-1.5 text-[8.5px] font-medium"
             style={{ color: whatsappMuted }}
           >
             <svg
