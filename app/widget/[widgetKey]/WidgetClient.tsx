@@ -1313,7 +1313,7 @@ messageRequestActiveRef.current = true;
   }
 
   const chatbotAvatar =
-    config.company.logoUrl || "/images/chatbot-avatar.png";
+    config.company.logoUrl || "/chatbot.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
@@ -1334,9 +1334,8 @@ messageRequestActiveRef.current = true;
     <div
       dir={isArabic ? "rtl" : "ltr"}
       onPointerDownCapture={handleFirstWidgetInteraction}
-      className="flex min-h-screen items-center justify-center bg-transparent p-1 font-sans"
-    >
-      <section className="flex h-[min(520px,calc(100vh-8px))] w-full max-w-[340px] flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
+className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"    >
+      <section className="flex h-full w-full max-w-none flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
         <header
           className="relative overflow-hidden px-3.5 py-3 text-white"
           style={{ backgroundColor: waHeader }}

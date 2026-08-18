@@ -476,8 +476,11 @@ export default async function WebsiteWidgetPage({
     frame.style.position = "fixed";
     frame.style.bottom = "72px";
     frame.style[widgetSide] = "14px";
-    frame.style.width = "min(350px, calc(100vw - 16px))";
-    frame.style.height = "min(540px, calc(100vh - 84px))";
+frame.style.width = "340px";
+frame.style.height = "520px";
+frame.style.width = "min(340px, calc(100vw - 12px))";
+frame.style.height = "min(520px, calc(100vh - 12px))";
+
     frame.style.border = "0";
     frame.style.borderRadius = "22px";
     frame.style.background = "transparent";
