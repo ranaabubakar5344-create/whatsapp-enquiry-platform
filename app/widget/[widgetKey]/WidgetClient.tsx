@@ -339,17 +339,17 @@ if (step === "CONSENT") {
 
 function LoadingScreen() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-transparent p-1.5">
-      <div className="w-full max-w-[340px] overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.18)]">
+    <div className="h-screen w-screen overflow-hidden bg-transparent p-0">
+      <div className="h-full w-full overflow-hidden rounded-[22px] border border-black/5 bg-white">
         <div className="animate-pulse">
-          <div className="h-[78px] bg-[#008069]" />
-          <div className="space-y-3 bg-[#EFEAE2] p-3.5">
+          <div className="h-[78px] bg-[#0A1414]" />
+          <div className="space-y-3 bg-[#F7F5EE] p-3.5">
             <div className="h-4 w-14 rounded-full bg-white/80" />
             <div className="flex gap-2">
               <div className="h-7 w-7 rounded-full bg-white" />
               <div className="h-12 w-3/4 rounded-2xl bg-white" />
             </div>
-            <div className="ml-auto h-11 w-1/2 rounded-2xl bg-[#D9FDD3]" />
+            <div className="ml-auto h-11 w-1/2 rounded-2xl bg-[#EEF7B8]" />
           </div>
           <div className="border-t border-slate-100 bg-white p-2.5">
             <div className="h-10 rounded-full bg-slate-100" />
@@ -1307,21 +1307,21 @@ messageRequestActiveRef.current = true;
 
   if (!config || (error && !conversation)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-transparent p-2">
-        <div className="w-full max-w-[340px] rounded-[22px] border border-red-100 bg-white p-6 text-center shadow-[0_22px_60px_rgba(15,23,42,0.18)]">
+      <div className="h-screen w-screen overflow-hidden bg-transparent p-0">
+        <div className="flex h-full w-full flex-col items-center justify-center rounded-[22px] border border-red-100 bg-white p-6 text-center">
           <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-lg font-black text-red-600">
             !
           </div>
-          <h1 className="mt-4 text-base font-bold text-[#111B21]">
+          <h1 className="mt-4 text-base font-bold text-[#0A1414]">
             Chat unavailable
           </h1>
-          <p className="mt-2 text-xs leading-5 text-[#667781]">
+          <p className="mt-2 text-xs leading-5 text-[#667085]">
             {error ?? "The chat widget could not be loaded."}
           </p>
           <button
             type="button"
             onClick={() => void initialiseWidget()}
-            className="mt-5 rounded-full bg-[#008069] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#006f5c]"
+            className="mt-5 rounded-full bg-[#0A1414] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#0A1414]"
           >
             Try again
           </button>
@@ -1330,7 +1330,7 @@ messageRequestActiveRef.current = true;
     );
   }
 
-  const chatbotAvatar = "/chatbot.png";
+  const chatbotAvatar = "/images/chatbot-avatar.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
@@ -1338,25 +1338,27 @@ messageRequestActiveRef.current = true;
       .charAt(0)
       .toUpperCase() || "A";
 
-  const waHeader = "#008069";
-  const waAction = "#00A884";
-  const waLauncher = "#25D366";
-  const waOutgoing = "#D9FDD3";
-  const waBackground = "#EFEAE2";
-  const waText = "#111B21";
-  const waMuted = "#667781";
-  const waBorder = "#E9EDEF";
+  const ucaDark = "#0A1414";
+  const ucaDarkSoft = "#113131";
+  const ucaLime = "#C8EB00";
+  const ucaLimeHover = "#B6D900";
+  const ucaLimeSoft = "#F0F7C2";
+  const ucaPanelSoft = "#F6F8E8";
+  const ucaBackground = "#F7F5EE";
+  const ucaText = "#0A1414";
+  const ucaMuted = "#667085";
+  const ucaBorder = "#E8ECC8";
 
   return (
     <div
       dir={isArabic ? "rtl" : "ltr"}
       onPointerDownCapture={handleFirstWidgetInteraction}
-      className="flex min-h-screen items-center justify-center bg-transparent p-1 font-sans"
+      className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"
     >
-      <section className="flex h-[min(520px,calc(100vh-8px))] w-full max-w-[340px] flex-col overflow-hidden rounded-[22px] border border-white/80 bg-white shadow-[0_20px_55px_rgba(17,27,33,0.20)] ring-1 ring-black/[0.03]">
+      <section className="flex h-full w-full max-w-none flex-col overflow-hidden rounded-[22px] border border-black/5 bg-white">
         <header
           className="relative overflow-hidden px-3.5 py-3 text-white"
-          style={{ backgroundColor: waHeader }}
+          style={{ background: `linear-gradient(135deg, ${ucaDark} 0%, ${ucaDarkSoft} 100%)` }}
         >
           <div className="pointer-events-none absolute -right-10 -top-14 h-28 w-28 rounded-full border border-white/10" />
           <div className="pointer-events-none absolute -bottom-16 right-5 h-24 w-24 rounded-full bg-white/[0.05]" />
@@ -1372,7 +1374,7 @@ messageRequestActiveRef.current = true;
               {config.widget.showOnlineStatus && (
                 <span
                   className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white"
-                  style={{ backgroundColor: waLauncher }}
+                  style={{ backgroundColor: ucaLime }}
                 />
               )}
             </div>
@@ -1385,7 +1387,7 @@ messageRequestActiveRef.current = true;
                 {config.widget.showOnlineStatus && (
                   <span
                     className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: waLauncher }}
+                    style={{ backgroundColor: ucaLime }}
                   />
                 )}
                 <span className="truncate">
@@ -1425,9 +1427,9 @@ messageRequestActiveRef.current = true;
         </header>
 
         {isWaitingForAgent && (
-          <div className="border-b border-amber-100 bg-[#FFF8E1] px-3 py-2.5">
+          <div className="border-b border-[#DDE5A5] bg-[#F6F8E8] px-3 py-2.5">
             <div className="flex items-start gap-2">
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EAF2A8] text-[#0A1414]">
                 <svg
                   viewBox="0 0 24 24"
                   className="h-3.5 w-3.5"
@@ -1441,10 +1443,10 @@ messageRequestActiveRef.current = true;
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-[10.5px] font-bold text-amber-900">
+                <p className="text-[10.5px] font-bold text-[#0A1414]">
                   {isArabic ? "تم طلب التحويل" : "Handoff requested"}
                 </p>
-                <p className="mt-0.5 text-[9px] leading-4 text-amber-800">
+                <p className="mt-0.5 text-[9px] leading-4 text-[#4B5563]">
                   {isArabic
                     ? "سيقوم مسؤول التسويق بالانضمام إلى المحادثة."
                     : "A Marketing Executive will join your conversation."}
@@ -1457,7 +1459,7 @@ messageRequestActiveRef.current = true;
                 type="button"
                 onClick={() => void startNewConversation()}
                 disabled={loading}
-                className="rounded-lg border border-amber-200 bg-white px-2.5 py-2 text-[9.5px] font-bold text-amber-800 transition hover:bg-amber-50 disabled:opacity-50"
+                className="rounded-lg border border-[#C8EB00] bg-white px-2.5 py-2 text-[9.5px] font-bold text-[#4B5563] transition hover:bg-[#F0F7C2] disabled:opacity-50"
               >
                 {isArabic ? "محادثة جديدة" : "New Chat"}
               </button>
@@ -1466,7 +1468,7 @@ messageRequestActiveRef.current = true;
                 <button
                   type="button"
                   onClick={openWhatsApp}
-                  className="rounded-lg bg-[#25D366] px-2.5 py-2 text-[9.5px] font-bold text-white transition hover:bg-[#20bd5a]"
+                  className="rounded-lg bg-[#C8EB00] px-2.5 py-2 text-[9.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
                 >
                   {isArabic ? "فتح واتساب" : "Open WhatsApp"}
                 </button>
@@ -1476,19 +1478,19 @@ messageRequestActiveRef.current = true;
         )}
 
         {isAgentActive && conversation?.assignedAgent && (
-          <div className="border-b border-emerald-100 bg-emerald-50 px-3 py-2">
+          <div className="border-b border-[#DDE5A5] bg-[#F6F8E8] px-3 py-2">
             <div className="flex items-center gap-2">
               <div
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                style={{ backgroundColor: waAction }}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-[#0A1414]"
+                style={{ backgroundColor: ucaLime }}
               >
                 {agentInitial}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-[10.5px] font-bold text-emerald-900">
+                <p className="truncate text-[10.5px] font-bold text-[#0A1414]">
                   {conversation.assignedAgent.name}
                 </p>
-                <p className="text-[9px] text-emerald-700">
+                <p className="text-[9px] text-[#4B5563]">
                   {isArabic
                     ? "مسؤول التسويق متصل الآن"
                     : "Marketing Executive is now online"}
@@ -1501,13 +1503,13 @@ messageRequestActiveRef.current = true;
         <div
           className="relative flex-1 overflow-y-auto px-3 py-3"
           style={{
-            backgroundColor: waBackground,
+            backgroundColor: ucaBackground,
             backgroundImage:
               "radial-gradient(circle at 1px 1px, rgba(17,27,33,0.045) 1px, transparent 0)",
             backgroundSize: "20px 20px",
           }}
         >
-          <div className="mx-auto mb-3 w-fit rounded-full bg-white/90 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400 shadow-sm">
+          <div className="mx-auto mb-3 w-fit rounded-full border border-[#E8ECC8] bg-white/95 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#667085] shadow-sm">
             {isArabic ? "اليوم" : "Today"}
           </div>
 
@@ -1532,7 +1534,7 @@ messageRequestActiveRef.current = true;
               if (isSystem) {
                 return (
                   <article key={message.id} className="flex justify-center">
-                    <div className="max-w-[88%] rounded-full bg-white/85 px-3 py-1.5 text-center text-[8.5px] font-medium leading-4 text-[#667781] shadow-sm">
+                    <div className="max-w-[88%] rounded-full bg-white/85 px-3 py-1.5 text-center text-[8.5px] font-medium leading-4 text-[#667085] shadow-sm">
                       {getVisibleMessageContent(message.content, isArabic)}
                     </div>
                   </article>
@@ -1548,8 +1550,8 @@ messageRequestActiveRef.current = true;
                 >
                   {!isCustomer && config.widget.showAgentAvatars && (
                     <div
-                      className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white text-[9px] font-bold text-white shadow-sm"
-                      style={{ backgroundColor: waAction }}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white bg-white text-[9px] font-bold text-[#0A1414] shadow-sm"
+                      style={{ backgroundColor: ucaLime }}
                     >
                       {message.sender === "AGENT" ? (
                         (
@@ -1573,7 +1575,7 @@ messageRequestActiveRef.current = true;
 
                   <div className="max-w-[78%]">
                     {message.sender === "AGENT" && (
-                      <p className="mb-0.5 px-1 text-[8.5px] font-bold text-[#667781]">
+                      <p className="mb-0.5 px-1 text-[8.5px] font-bold text-[#667085]">
                         {senderName}
                       </p>
                     )}
@@ -1583,14 +1585,15 @@ messageRequestActiveRef.current = true;
                       style={
                         isCustomer
                           ? {
-                              backgroundColor: waOutgoing,
-                              color: waText,
+                              backgroundColor: ucaLimeSoft,
+                              color: ucaText,
+                              border: "1px solid rgba(200,235,0,0.45)",
                               borderBottomRightRadius: "4px",
                             }
                           : {
                               backgroundColor: "#FFFFFF",
-                              color: waText,
-                              border: `1px solid ${waBorder}`,
+                              color: ucaText,
+                              border: `1px solid ${ucaBorder}`,
                               borderBottomLeftRadius: "4px",
                             }
                       }
@@ -1602,7 +1605,7 @@ messageRequestActiveRef.current = true;
                       className={`mt-0.5 flex items-center gap-1 px-1 text-[7.5px] ${
                         isCustomer ? "justify-end" : "justify-start"
                       }`}
-                      style={{ color: waMuted }}
+                      style={{ color: ucaMuted }}
                     >
                       <span>{formatMessageTime(message.createdAt)}</span>
 
@@ -1610,7 +1613,7 @@ messageRequestActiveRef.current = true;
                         <span
                           className={
                             message.status === "READ"
-                              ? "font-bold text-[#53BDEB]"
+                              ? "font-bold text-[#0A1414]"
                               : ""
                           }
                         >
@@ -1636,7 +1639,7 @@ messageRequestActiveRef.current = true;
                   </div>
                 )}
 
-                <div className="rounded-[14px] rounded-bl-[4px] border border-[#E9EDEF] bg-white px-3 py-2 shadow-sm">
+                <div className="rounded-[14px] rounded-bl-[4px] border border-[#E5E7EB] bg-white px-3 py-2 shadow-sm">
                   <div className="flex gap-1">
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
@@ -1653,7 +1656,7 @@ messageRequestActiveRef.current = true;
         {quickReplies.length > 0 &&
           !isConversationClosed &&
           !sending && (
-            <div className="border-t border-[#E9EDEF] bg-white px-3 py-2">
+            <div className="border-t border-[#E5E7EB] bg-white px-3 py-2">
               <div
                 className={`grid gap-1.5 ${
                   quickReplies.length === 1
@@ -1675,22 +1678,22 @@ messageRequestActiveRef.current = true;
                       onClick={() => void sendMessage(reply.value)}
                       className={`min-h-[34px] rounded-lg border px-2.5 py-1.5 text-center text-[9.5px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         isPrimaryConsent
-                          ? "text-white"
+                          ? "text-[#0A1414]"
                           : isSecondaryConsent
                             ? "border-slate-200 bg-slate-50 text-slate-500"
-                            : "bg-white hover:bg-emerald-50"
+                            : "bg-white hover:bg-[#F6F8E8]"
                       }`}
                       style={
                         isPrimaryConsent
                           ? {
-                              backgroundColor: waAction,
-                              borderColor: waAction,
+                              backgroundColor: ucaLime,
+                              borderColor: ucaLime,
                             }
                           : isSecondaryConsent
                             ? undefined
                             : {
-                                borderColor: "rgba(0,168,132,0.35)",
-                                color: waAction,
+                                borderColor: "rgba(200,235,0,0.75)",
+                                color: ucaDark,
                               }
                       }
                     >
@@ -1703,11 +1706,11 @@ messageRequestActiveRef.current = true;
           )}
 
         {(showWhatsAppButton || isWaitingForAgent) && canUseWhatsApp && (
-          <div className="border-t border-[#E9EDEF] bg-white px-3 py-2">
+          <div className="border-t border-[#E5E7EB] bg-white px-3 py-2">
             <button
               type="button"
               onClick={openWhatsApp}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#20bd5a]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#C8EB00] px-3 py-2 text-[10.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1728,10 +1731,10 @@ messageRequestActiveRef.current = true;
           </div>
         )}
 
-        <footer className="border-t border-[#E9EDEF] bg-white p-2">
+        <footer className="border-t border-[#E5E7EB] bg-white p-2">
           {isConversationClosed ? (
             <div className="space-y-2">
-              <p className="text-center text-[9px] font-medium text-[#667781]">
+              <p className="text-center text-[9px] font-medium text-[#667085]">
                 {isArabic
                   ? "تم إغلاق هذه المحادثة."
                   : "This conversation has been closed."}
@@ -1740,20 +1743,20 @@ messageRequestActiveRef.current = true;
               <button
                 type="button"
                 onClick={() => void startNewConversation()}
-                className="w-full rounded-full bg-[#00A884] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#008f70]"
+                className="w-full rounded-full bg-[#C8EB00] px-3 py-2 text-[10.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
               >
                 {isArabic ? "بدء محادثة جديدة" : "Start New Chat"}
               </button>
             </div>
           ) : choiceOnlyStep ? (
-            <p className="py-1 text-center text-[8.5px] font-medium text-[#8696A0]">
+            <p className="py-1 text-center text-[8.5px] font-medium text-[#98A2B3]">
               {isArabic
                 ? "اختر أحد الخيارات للمتابعة"
                 : "Select an option to continue"}
             </p>
           ) : (
             <form onSubmit={handleSubmit} className="flex items-end gap-1.5">
-              <div className="flex min-h-10 flex-1 items-end rounded-full border border-[#E9EDEF] bg-[#F0F2F5]">
+              <div className="flex min-h-10 flex-1 items-end rounded-full border border-[#E8ECC8] bg-[#F3F5EA]">
                 <textarea
                   value={input}
                   rows={1}
@@ -1764,7 +1767,7 @@ messageRequestActiveRef.current = true;
                   placeholder={
                     isArabic ? "اكتب رسالتك..." : "Type a message..."
                   }
-                  className="max-h-20 min-h-10 flex-1 resize-none bg-transparent px-3.5 py-2.5 text-[10.5px] text-[#111B21] outline-none placeholder:text-[#8696A0] disabled:opacity-60"
+                  className="max-h-20 min-h-10 flex-1 resize-none bg-transparent px-3.5 py-2.5 text-[10.5px] text-[#0A1414] outline-none placeholder:text-[#98A2B3] disabled:opacity-60"
                 />
               </div>
 
@@ -1772,7 +1775,7 @@ messageRequestActiveRef.current = true;
                 type="submit"
                 disabled={sending || input.trim().length === 0}
                 aria-label="Send message"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00A884] text-white shadow-sm transition hover:bg-[#008f70] disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#C8EB00] text-[#0A1414] shadow-sm transition hover:bg-[#B6D900] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1788,7 +1791,7 @@ messageRequestActiveRef.current = true;
             </form>
           )}
 
-          <div className="mt-1.5 flex items-center justify-center gap-1 text-[7.5px] font-medium text-[#8696A0]">
+          <div className="mt-1.5 flex items-center justify-center gap-1 text-[7.5px] font-medium text-[#98A2B3]">
             <svg
               viewBox="0 0 24 24"
               className="h-2.5 w-2.5"
