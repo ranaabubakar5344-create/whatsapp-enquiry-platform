@@ -20,54 +20,73 @@ type PhoneValidationResult = {
   normalizedPhone: string | null;
 };
 
-function validateInternationalPhone(
+function validatePhoneNumber(
   value: string
 ): PhoneValidationResult {
   const input = value.trim();
 
-  // Country code ke liye + mandatory.
-  if (!input.startsWith("+")) {
+  if (!input) {
     return {
       isValid: false,
       normalizedPhone: null,
     };
   }
 
-  // Sirf phone-number characters allow karein.
-  if (!/^\+[0-9\s()-]+$/.test(input)) {
+  // Allow only common phone-number characters.
+  if (!/^\+?[0-9\s()-]+$/.test(input)) {
     return {
       isValid: false,
       normalizedPhone: null,
     };
   }
 
-  try {
-    const phoneNumber = parsePhoneNumber(input, {
-      extract: false,
-    });
+  // If the user enters +country code, validate it as a real
+  // international number and save it in E.164 format.
+  if (input.startsWith("+")) {
+    try {
+      const phoneNumber = parsePhoneNumber(input, {
+        extract: false,
+      });
 
-    if (
-      !phoneNumber ||
-      !phoneNumber.isPossible() ||
-      !phoneNumber.isValid()
-    ) {
+      if (
+        !phoneNumber ||
+        !phoneNumber.isPossible() ||
+        !phoneNumber.isValid()
+      ) {
+        return {
+          isValid: false,
+          normalizedPhone: null,
+        };
+      }
+
+      return {
+        isValid: true,
+        normalizedPhone: phoneNumber.number,
+      };
+    } catch {
       return {
         isValid: false,
         normalizedPhone: null,
       };
     }
+  }
 
-    return {
-      isValid: true,
-      // Database mein clean international format save hoga.
-      normalizedPhone: phoneNumber.number,
-    };
-  } catch {
+  // Local numbers are also accepted, for example:
+  // 0541234567, 0501234567, 03231234567.
+  // We keep the leading zero because no country has been selected yet.
+  const digitsOnly = input.replace(/\D/g, "");
+
+  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
     return {
       isValid: false,
       normalizedPhone: null,
     };
   }
+
+  return {
+    isValid: true,
+    normalizedPhone: digitsOnly,
+  };
 }
 
 export type WidgetProgramme = {
@@ -223,8 +242,8 @@ function getInvalidPhoneMessage(
   language: "en" | "ar"
 ): string {
   return language === "ar"
-    ? "رقم الهاتف غير صحيح. يرجى إدخال رقم صالح مع رمز الدولة.\nمثال: +971 000000000"
-    : "That phone number is not valid. Please enter a valid number with country code.\nExample: +971 00 000 0000";
+    ? "رقم الهاتف غير صحيح. يمكنك إدخال رقم محلي أو رقم دولي مع رمز الدولة.\nأمثلة: +971 00 000 0000 "
+    : "That phone number does not look valid. You can enter a local number or an international number with country code.\nExamples: +971 00 000 0000, 054 000 0000";
 }
 function isHumanHandoffRequest(message: string): boolean {
   const normalized = normalizeText(message);
@@ -232,7 +251,7 @@ function isHumanHandoffRequest(message: string): boolean {
   const phrases = [
     "agent",
     "human",
-    "marketing executive",
+    "admissions advisor",
     "marketing",
     "representative",
     "counsellor",
@@ -441,82 +460,167 @@ function getMainMenu(language: "en" | "ar"): string {
 }
 
 function getProgrammesMessage(
-  programmes: WidgetProgramme[],
+  _programmes: WidgetProgramme[],
   language: "en" | "ar"
 ): string {
-  if (programmes.length === 0) {
-    return language === "ar"
-      ? "سيشارك مسؤول التسويق معلومات البرامج المتاحة معك."
-      : "A Marketing Executive can share the currently available programmes with you.";
+  if (language === "ar") {
+    return [
+      "برامج UCA المتاحة:",
+      "",
+      "برامج البكالوريوس:",
+      "BSc (Hons) Computer Science",
+      "https://ucadumylink.vercel.app/programmes/computer-science/",
+      "",
+      "BSc (Hons) Games Development",
+      "https://ucadumylink.vercel.app/programmes/game-development/",
+      "",
+      "BA (Hons) Graphic Design",
+      "https://ucadumylink.vercel.app/programmes/graphic-design/",
+      "",
+      "BA (Hons) Business & Management",
+      "https://ucadumylink.vercel.app/programmes/business-management/",
+      "",
+      "BA (Hons) Visual Communication",
+      "https://ucadumylink.vercel.app/programmes/visual-communication/",
+      "",
+      "BA (Hons) Digital Marketing & Social Media",
+      "https://ucadumylink.vercel.app/programmes/digitalmarketing-socialmedia/",
+      "",
+      "برنامج الدراسات العليا:",
+      "MBA",
+      "https://ucadumylink.vercel.app/programmes/mba/",
+      "",
+      "مسارات الدخول:",
+      "Integrated Foundation Year",
+      "https://ucadumylink.vercel.app/programmes/integrated-foundation/",
+      "",
+      "Integrated Pre-Masters",
+      "https://ucadumylink.vercel.app/programmes/integrated-premasters/",
+      "",
+      "اكتب اسم البرنامج الذي تهتم به أو اختر التحدث مع مستشار القبول.",
+    ].join("\n");
   }
 
-  const items = programmes.map(
-    (programme, index) => {
-      const details = [
-        programme.duration
-          ? `${language === "ar" ? "المدة" : "Duration"}: ${programme.duration}`
-          : null,
-        programme.fee
-          ? `${language === "ar" ? "الرسوم" : "Fee"}: ${programme.fee}`
-          : null,
-      ].filter(Boolean);
-
-      return `${index + 1}. ${programme.name}${
-        details.length
-          ? `\n   ${details.join(" • ")}`
-          : ""
-      }`;
-    }
-  );
-
   return [
-    language === "ar"
-      ? "البرامج المتاحة:"
-      : "Available programmes:",
+    "Explore our UCA programmes",
     "",
-    ...items,
+    "Undergraduate Programmes",
     "",
-    language === "ar"
-      ? "اكتب اسم البرنامج أو رقمه، أو اختر التحدث مع مسؤول التسويق."
-      : "Type the programme name or number, or ask to speak with a Marketing Executive.",
+    "BSc (Hons) Computer Science",
+    "https://ucadumylink.vercel.app/programmes/computer-science/",
+    "",
+    "BSc (Hons) Games Development",
+    "https://ucadumylink.vercel.app/programmes/game-development/",
+    "",
+    "BA (Hons) Graphic Design",
+    "https://ucadumylink.vercel.app/programmes/graphic-design/",
+    "",
+    "BA (Hons) Business & Management",
+    "https://ucadumylink.vercel.app/programmes/business-management/",
+    "",
+    "BA (Hons) Visual Communication",
+    "https://ucadumylink.vercel.app/programmes/visual-communication/",
+    "",
+    "BA (Hons) Digital Marketing & Social Media",
+    "https://ucadumylink.vercel.app/programmes/digitalmarketing-socialmedia/",
+    "",
+    "Postgraduate Programme",
+    "",
+    "MBA",
+    "https://ucadumylink.vercel.app/programmes/mba/",
+    "",
+    "Entry Routes",
+    "",
+    "Integrated Foundation Year",
+    "https://ucadumylink.vercel.app/programmes/integrated-foundation/",
+    "",
+    "Integrated Pre-Masters",
+    "https://ucadumylink.vercel.app/programmes/integrated-premasters/",
+    "",
+    "Type the programme name you are interested in, or choose Speak to an Admissions Advisor for guidance.",
   ].join("\n");
 }
 
 function getFeesMessage(
-  programmes: WidgetProgramme[],
+  _programmes: WidgetProgramme[],
   language: "en" | "ar"
 ): string {
-  const programmesWithDetails = programmes.filter(
-    (programme) =>
-      programme.fee || programme.duration
-  );
-
-  if (programmesWithDetails.length === 0) {
-    return language === "ar"
-      ? "تختلف الرسوم والمدة حسب البرنامج. يمكن لمسؤول التسويق تزويدك بالتفاصيل الدقيقة."
-      : "Fees and duration vary by programme. A Marketing Executive can provide the exact details.";
+  if (language === "ar") {
+    return [
+      "الرسوم الدراسية",
+      "",
+      "برامج البكالوريوس",
+      "AED 47,775",
+      "شاملة ضريبة القيمة المضافة 5%",
+      "",
+      "برامج الدراسات العليا",
+      "AED 49,775",
+      "شاملة ضريبة القيمة المضافة 5%",
+      "",
+      "Foundation & Pre-Master's",
+      "AED 29,775",
+      "شاملة ضريبة القيمة المضافة 5%",
+      "",
+      "عرض البرامج:",
+      "https://ucadumylink.vercel.app/Programmes-ucauae/",
+    ].join("\n");
   }
 
-  return getProgrammesMessage(
-    programmesWithDetails,
-    language
-  );
+  return [
+    "Tuition Fees",
+    "",
+    "Undergraduate Programmes",
+    "AED 47,775",
+    "Inclusive of 5% VAT",
+    "Tuition fee for undergraduate programmes.",
+    "",
+    "Postgraduate Programmes",
+    "AED 49,775",
+    "Inclusive of 5% VAT",
+    "Tuition fee for postgraduate programmes.",
+    "",
+    "Foundation & Pre-Master's",
+    "AED 29,775",
+    "Inclusive of 5% VAT",
+    "",
+    "View Programmes:",
+    "https://ucadumylink.vercel.app/Programmes-ucauae/",
+  ].join("\n");
 }
 
 function getAdmissionMessage(
   language: "en" | "ar"
 ): string {
   return language === "ar"
-    ? "تختلف متطلبات القبول حسب البرنامج والمؤهل السابق. اختر برنامجاً أو تحدث مع مسؤول التسويق للحصول على تقييم دقيق."
-    : "Admission requirements depend on the programme and your previous qualification. Select a programme or speak with a Marketing Executive for an accurate assessment.";
+    ? "تختلف متطلبات القبول حسب البرنامج والمؤهل السابق. اختر برنامجاً أو تحدث مع مستشار القبول للحصول على تقييم دقيق."
+    : "Admission requirements depend on the programme and your previous qualification. Select a programme or speak with an Admissions Advisor for an accurate assessment.";
 }
 
 function getLocationMessage(
   language: "en" | "ar"
 ): string {
-  return language === "ar"
-    ? "يمكن العثور على عنوان المؤسسة وخريطة الموقع في صفحة التواصل. يمكن لمسؤول التسويق أيضاً إرسال الموقع إليك."
-    : "The institution address and map are available on the contact page. A Marketing Executive can also share the exact location.";
+  const mapUrl =
+    "https://www.google.com/maps/search/?api=1&query=University+for+the+Creative+Arts+delivered+by+Future+Education+University+College+UAQ%2C+UAQ+FTZ+-+Zone+C+-+Al+Barqaa+-+Emirate+of+Umm+Al+Quwain";
+
+  if (language === "ar") {
+    return [
+      "University for the Creative Arts delivered by Future Education University College UAQ",
+      "UAQ FTZ - Zone C - Al Barqaa",
+      "Emirate of Umm Al Quwain, UAE",
+      "",
+      "فتح الموقع على خرائط Google:",
+      mapUrl,
+    ].join("\n");
+  }
+
+  return [
+    "University for the Creative Arts delivered by Future Education University College UAQ",
+    "UAQ FTZ - Zone C - Al Barqaa",
+    "Emirate of Umm Al Quwain, UAE",
+    "",
+    "Open in Google Maps:",
+    mapUrl,
+  ].join("\n");
 }
 
 function getNamePrompt(language: "en" | "ar"): string {
@@ -529,8 +633,8 @@ function getPhonePrompt(
   language: "en" | "ar"
 ): string {
   return language === "ar"
-    ? "يرجى إدخال رقم هاتف صحيح مع رمز الدولة.\nمثال: +971 XX XXX XXXX"
-    : "Please enter a valid phone number with country code.\nExample: +971 XX XXX  XXXX";
+    ? "يرجى إدخال رقم هاتف صالح. يمكنك كتابة الرقم المحلي أو الرقم الدولي مع رمز الدولة.\nأمثلة: +971 00 000 0000 أو 054 000 0000 أو 0323 0000000"
+    : "Please enter a valid phone number. You can use a local number or an international number with country code.\nExamples: +971 00 000 0000, 054 000 0000, or 0323 0000000";
 }
 
 function getEmailPrompt(language: "en" | "ar"): string {
@@ -560,8 +664,8 @@ function getCountryPrompt(language: "en" | "ar"): string {
 
 function getWaitingMessage(language: "en" | "ar"): string {
   return language === "ar"
-    ? "شكراً لك. تم تحويل استفسارك إلى مسؤول التسويق. سيقوم أحد أعضاء الفريق بالانضمام إلى المحادثة."
-    : "Thank you. Your enquiry has been transferred to a Marketing Executive. A team member will join the conversation.";
+    ? "شكراً لك. تم تحويل استفسارك إلى مستشار القبول. سيقوم أحد أعضاء الفريق بالانضمام إلى المحادثة."
+    : "Thank you. Your enquiry has been transferred to a Admissions Advisor. A team member will join the conversation.";
 }
 
 function getWhatsAppMessage(language: "en" | "ar"): string {
@@ -967,7 +1071,7 @@ export function handleWebsiteBotMessage({
 
     case "ASK_PHONE": {
       const phoneValidation =
-        validateInternationalPhone(normalizedMessage);
+        validatePhoneNumber(normalizedMessage);
 
       if (
         !phoneValidation.isValid ||
@@ -1274,8 +1378,8 @@ export function handleWebsiteBotMessage({
           replies: [
             faq.answer,
             language === "ar"
-              ? "هل تحتاج إلى مساعدة إضافية؟ يمكنك التحدث مع مسؤول التسويق."
-              : "Need more help? You can ask to speak with a Marketing Executive.",
+              ? "هل تحتاج إلى مساعدة إضافية؟ يمكنك التحدث مع مستشار القبول."
+              : "Need more help? You can ask to speak with a Admissions Advisor.",
           ],
           nextStep: "MAIN_MENU",
           language,
@@ -1290,8 +1394,8 @@ export function handleWebsiteBotMessage({
       return {
        replies: [
   language === "ar"
-    ? "لم أجد إجابة دقيقة لهذا السؤال. يمكنك اختيار أحد الخيارات أو التحدث مع مسؤول التسويق."
-    : "I could not find an exact answer to that question. Choose an option below or speak with a Marketing Executive.",
+    ? "لم أجد إجابة دقيقة لهذا السؤال. يمكنك اختيار أحد الخيارات أو التحدث مع مستشار القبول."
+    : "I could not find an exact answer to that question. Choose an option below or speak with a Admissions Advisor.",
 ],
         nextStep: "MAIN_MENU",
         language,

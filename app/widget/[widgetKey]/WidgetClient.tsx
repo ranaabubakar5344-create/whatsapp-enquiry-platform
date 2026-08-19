@@ -193,6 +193,38 @@ if (
   return content;
 }
 
+function renderMessageContent(
+  content: string,
+  isArabic: boolean
+) {
+  const visibleContent = getVisibleMessageContent(
+    content,
+    isArabic
+  );
+
+  const parts = visibleContent.split(
+    /(https?:\/\/[^\s]+)/g
+  );
+
+  return parts.map((part, index) => {
+    if (/^https?:\/\/[^\s]+$/.test(part)) {
+      return (
+        <a
+          key={`${part}-${index}`}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-[#0A1414] underline decoration-[#C8EB00] decoration-2 underline-offset-2 hover:opacity-75"
+        >
+          {part}
+        </a>
+      );
+    }
+
+    return <span key={`text-${index}`}>{part}</span>;
+  });
+}
+
 function normalizeWhatsAppNumber(
   value: string | null
 ): string | null {
@@ -285,11 +317,11 @@ if (step === "CONSENT") {
       },
       {
         label: isArabic
-          ? "الرسوم والمدة"
-          : "Fees & duration",
+          ? "الرسوم الدراسية"
+          : "Tuition Fees",
         value: isArabic
-          ? "الرسوم والمدة"
-          : "Fees & duration",
+          ? "الرسوم الدراسية"
+          : "Tuition Fees",
       },
       {
         label: isArabic
@@ -312,11 +344,11 @@ if (step === "CONSENT") {
     if (humanHandoffEnabled) {
       replies.push({
         label: isArabic
-          ? "مسؤول التسويق"
-          : "Marketing Executive",
+          ? "تحدث مع مستشار القبول"
+          : "Speak to an Admissions Advisor",
         value: isArabic
-          ? "مسؤول التسويق"
-          : "Marketing Executive",
+          ? "مستشار القبول"
+          : "Speak to an Admissions Advisor",
       });
     }
 
@@ -1272,8 +1304,8 @@ messageRequestActiveRef.current = true;
 
     const text = encodeURIComponent(
       isArabic
-        ? "مرحباً، أود متابعة استفساري مع مسؤول التسويق."
-        : "Hello, I would like to continue my enquiry with a Marketing Executive."
+        ? "مرحباً، أود متابعة استفساري مع مستشار القبول."
+        : "Hello, I would like to continue my enquiry with a Admissions Advisor."
     );
 
     window.open(
@@ -1421,8 +1453,8 @@ messageRequestActiveRef.current = true;
                       }`
                     : isWaitingForAgent
                       ? isArabic
-                        ? "جاري توصيلك بمسؤول التسويق"
-                        : "Connecting you to a Marketing Executive"
+                        ? "جاري توصيلك بمستشار القبول"
+                        : "Connecting you to a Admissions Advisor"
                       : "Courses, Admissions & Applications"}
                 </span>
               </div>
@@ -1495,8 +1527,8 @@ messageRequestActiveRef.current = true;
                 </p>
                 <p className="mt-0.5 text-[9px] leading-4 text-[#4B5563]">
                   {isArabic
-                    ? "سيقوم مسؤول التسويق بالانضمام إلى المحادثة."
-                    : "A Marketing Executive will join your conversation."}
+                    ? "سيقوم مستشار القبول بالانضمام إلى المحادثة."
+                    : "A Admissions Advisor will join your conversation."}
                 </p>
               </div>
             </div>
@@ -1539,8 +1571,8 @@ messageRequestActiveRef.current = true;
                 </p>
                 <p className="text-[9px] text-[#4B5563]">
                   {isArabic
-                    ? "مسؤول التسويق متصل الآن"
-                    : "Marketing Executive is now online"}
+                    ? "مستشار القبول متصل الآن"
+                    : "Admissions Advisor is now online"}
                 </p>
               </div>
             </div>
@@ -1569,7 +1601,7 @@ messageRequestActiveRef.current = true;
                 message.sender === "AGENT"
                   ? message.senderUser?.name ??
                     conversation?.assignedAgent?.name ??
-                    "Marketing Executive"
+                    "Admissions Advisor"
                   : message.sender === "BOT"
                     ? config.widget.displayName
                     : isSystem
@@ -1582,7 +1614,7 @@ messageRequestActiveRef.current = true;
                 return (
                   <article key={message.id} className="flex justify-center">
                     <div className="max-w-[88%] rounded-full bg-white/85 px-3 py-1.5 text-center text-[8.5px] font-medium leading-4 text-[#667085] shadow-sm">
-                      {getVisibleMessageContent(message.content, isArabic)}
+                      {renderMessageContent(message.content, isArabic)}
                     </div>
                   </article>
                 );
@@ -1645,7 +1677,7 @@ messageRequestActiveRef.current = true;
                             }
                       }
                     >
-                      {getVisibleMessageContent(message.content, isArabic)}
+                      {renderMessageContent(message.content, isArabic)}
                     </div>
 
                     <div
