@@ -1330,7 +1330,7 @@ messageRequestActiveRef.current = true;
     );
   }
 
-  const chatbotAvatar = "/chat.png";
+  const chatbotAvatar = "/images/chatbot-avatar.png";
 
   const agentInitial =
     conversation?.assignedAgent?.name
@@ -1339,15 +1339,15 @@ messageRequestActiveRef.current = true;
       .toUpperCase() || "A";
 
   const ucaDark = "#0A1414";
-  const ucaDarkSoft = "#000000";
+  const ucaDarkSoft = "#113131";
   const ucaLime = "#C8EB00";
   const ucaLimeHover = "#B6D900";
-  const ucaLimeSoft = "#F0F7C2";
-  const ucaPanelSoft = "#F6F8E8";
+  const ucaLimeSoft = "#EFF6BE";
+  const ucaPanelSoft = "#F5F5F2";
   const ucaBackground = "#F7F5EE";
   const ucaText = "#0A1414";
   const ucaMuted = "#667085";
-  const ucaBorder = "#E8ECC8";
+  const ucaBorder = "#E5E7EB";
 
   return (
     <div
@@ -1355,6 +1355,30 @@ messageRequestActiveRef.current = true;
       onPointerDownCapture={handleFirstWidgetInteraction}
       className="h-screen w-screen overflow-hidden bg-transparent p-0 font-sans"
     >
+      <style>{`
+        .uca-chat-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #B8BDC5 transparent;
+        }
+
+        .uca-chat-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .uca-chat-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .uca-chat-scrollbar::-webkit-scrollbar-thumb {
+          background: #B8BDC5;
+          border-radius: 999px;
+        }
+
+        .uca-chat-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #98A2B3;
+        }
+      `}</style>
+
       <section className="flex h-full w-full max-w-none flex-col overflow-hidden rounded-[22px] border border-black/5 bg-white">
         <header
           className="relative overflow-hidden px-3.5 py-3 text-white"
@@ -1399,37 +1423,60 @@ messageRequestActiveRef.current = true;
                       ? isArabic
                         ? "جاري توصيلك بمسؤول التسويق"
                         : "Connecting you to a Marketing Executive"
-                      : "Here to help with courses, admissions and applications"}
+                      : "Courses, Admissions & Applications"}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={closeWidget}
-              title={isArabic ? "إغلاق المحادثة" : "Close chat"}
-              aria-label={isArabic ? "إغلاق المحادثة" : "Close chat"}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                title={isArabic ? "تحديث المحادثة" : "Refresh chat"}
+                aria-label={isArabic ? "تحديث المحادثة" : "Refresh chat"}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
               >
-                <path d="M6 6l12 12" />
-                <path d="M18 6L6 18" />
-              </svg>
-            </button>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 11a8.1 8.1 0 1 0 .4 4" />
+                  <path d="M20 4v7h-7" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={closeWidget}
+                title={isArabic ? "إغلاق المحادثة" : "Close chat"}
+                aria-label={isArabic ? "إغلاق المحادثة" : "Close chat"}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                >
+                  <path d="M6 6l12 12" />
+                  <path d="M18 6L6 18" />
+                </svg>
+              </button>
+            </div>
           </div>
         </header>
 
         {isWaitingForAgent && (
-          <div className="border-b border-[#DDE5A5] bg-[#F6F8E8] px-3 py-2.5">
+          <div className="border-b border-[#E5E7EB] bg-[#F5F5F2] px-3 py-2.5">
             <div className="flex items-start gap-2">
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EAF2A8] text-[#0A1414]">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#C8EB00] text-[#0A1414]">
                 <svg
                   viewBox="0 0 24 24"
                   className="h-3.5 w-3.5"
@@ -1459,7 +1506,7 @@ messageRequestActiveRef.current = true;
                 type="button"
                 onClick={() => void startNewConversation()}
                 disabled={loading}
-                className="rounded-lg border border-[#C8EB00] bg-white px-2.5 py-2 text-[9.5px] font-bold text-[#4B5563] transition hover:bg-[#F0F7C2] disabled:opacity-50"
+                className="rounded-lg border border-[#E5E7EB] bg-white px-2.5 py-2 text-[9.5px] font-bold text-[#0A1414] transition hover:border-[#C8EB00] hover:bg-[#FAFAF7] disabled:opacity-50"
               >
                 {isArabic ? "محادثة جديدة" : "New Chat"}
               </button>
@@ -1468,7 +1515,7 @@ messageRequestActiveRef.current = true;
                 <button
                   type="button"
                   onClick={openWhatsApp}
-                  className="rounded-lg bg-[#C8EB00] px-2.5 py-2 text-[9.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
+                  className="rounded-lg bg-[#0A1414] px-2.5 py-2 text-[9.5px] font-bold text-white transition hover:bg-[#162323]"
                 >
                   {isArabic ? "فتح واتساب" : "Open WhatsApp"}
                 </button>
@@ -1478,7 +1525,7 @@ messageRequestActiveRef.current = true;
         )}
 
         {isAgentActive && conversation?.assignedAgent && (
-          <div className="border-b border-[#DDE5A5] bg-[#F6F8E8] px-3 py-2">
+          <div className="border-b border-[#E5E7EB] bg-[#F5F5F2] px-3 py-2">
             <div className="flex items-center gap-2">
               <div
                 className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-[#0A1414]"
@@ -1501,7 +1548,7 @@ messageRequestActiveRef.current = true;
         )}
 
         <div
-          className="relative flex-1 overflow-y-auto px-3 py-3"
+          className="uca-chat-scrollbar relative flex-1 overflow-y-auto px-3 py-3"
           style={{
             backgroundColor: ucaBackground,
             backgroundImage:
@@ -1509,7 +1556,7 @@ messageRequestActiveRef.current = true;
             backgroundSize: "20px 20px",
           }}
         >
-          <div className="mx-auto mb-3 w-fit rounded-full border border-[#E8ECC8] bg-white/95 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#667085] shadow-sm">
+          <div className="mx-auto mb-3 w-fit rounded-full border border-[#E5E7EB] bg-white px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[#667085] shadow-[0_1px_2px_rgba(10,20,20,0.05)]">
             {isArabic ? "اليوم" : "Today"}
           </div>
 
@@ -1681,7 +1728,7 @@ messageRequestActiveRef.current = true;
                           ? "text-[#0A1414]"
                           : isSecondaryConsent
                             ? "border-slate-200 bg-slate-50 text-slate-500"
-                            : "bg-white hover:bg-[#F6F8E8]"
+                            : "border-[#E5E7EB] bg-white text-[#0A1414] hover:border-[#C8EB00] hover:bg-[#FAFAF7]"
                       }`}
                       style={
                         isPrimaryConsent
@@ -1691,10 +1738,7 @@ messageRequestActiveRef.current = true;
                             }
                           : isSecondaryConsent
                             ? undefined
-                            : {
-                                borderColor: "rgba(200,235,0,0.75)",
-                                color: ucaDark,
-                              }
+                            : undefined
                       }
                     >
                       {reply.label}
@@ -1710,11 +1754,11 @@ messageRequestActiveRef.current = true;
             <button
               type="button"
               onClick={openWhatsApp}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#C8EB00] px-3 py-2 text-[10.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#0A1414] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#162323]"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-4 w-4"
+                className="h-4 w-4 text-[#C8EB00]"
                 fill="currentColor"
               >
                 <path d="M12 2a9.6 9.6 0 0 0-8.2 14.6L2.5 21.5l5-1.3A9.6 9.6 0 1 0 12 2Zm0 17.4a7.7 7.7 0 0 1-3.9-1.1l-.3-.2-3 .8.8-2.9-.2-.3A7.7 7.7 0 1 1 12 19.4Zm4.2-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.4-.7-2.4-1.3-3.3-2.9-.2-.3.2-.3.6-1.1.1-.2.1-.4 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1 0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.1-.2-.2-.4-.3Z" />
@@ -1743,7 +1787,7 @@ messageRequestActiveRef.current = true;
               <button
                 type="button"
                 onClick={() => void startNewConversation()}
-                className="w-full rounded-full bg-[#C8EB00] px-3 py-2 text-[10.5px] font-bold text-[#0A1414] transition hover:bg-[#B6D900]"
+                className="w-full rounded-full bg-[#0A1414] px-3 py-2 text-[10.5px] font-bold text-white transition hover:bg-[#162323]"
               >
                 {isArabic ? "بدء محادثة جديدة" : "Start New Chat"}
               </button>
@@ -1756,7 +1800,7 @@ messageRequestActiveRef.current = true;
             </p>
           ) : (
             <form onSubmit={handleSubmit} className="flex items-end gap-1.5">
-              <div className="flex min-h-10 flex-1 items-end rounded-full border border-[#E8ECC8] bg-[#F3F5EA]">
+              <div className="flex min-h-10 flex-1 items-end rounded-full border border-[#E5E7EB] bg-[#F4F4F1] transition focus-within:border-[#C8EB00]">
                 <textarea
                   value={input}
                   rows={1}
