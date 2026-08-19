@@ -1371,7 +1371,7 @@ messageRequestActiveRef.current = true;
       .toUpperCase() || "A";
 
   const ucaDark = "#0A1414";
-  const ucaDarkSoft = "#113131";
+  const ucaDarkSoft = "#070707";
   const ucaLime = "#C8EB00";
   const ucaLimeHover = "#B6D900";
   const ucaLimeSoft = "#EFF6BE";

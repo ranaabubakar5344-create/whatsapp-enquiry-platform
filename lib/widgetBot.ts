@@ -633,8 +633,8 @@ function getPhonePrompt(
   language: "en" | "ar"
 ): string {
   return language === "ar"
-    ? "يرجى إدخال رقم هاتف صالح. يمكنك كتابة الرقم المحلي أو الرقم الدولي مع رمز الدولة.\nأمثلة: +971 00 000 0000 أو 054 000 0000 أو 0323 0000000"
-    : "Please enter a valid phone number. You can use a local number or an international number with country code.\nExamples: +971 00 000 0000, 054 000 0000, or 0323 0000000";
+    ? "يرجى إدخال رقم هاتف صالح. يمكنك كتابة الرقم المحلي أو الرقم الدولي مع رمز الدولة.\nأمثلة: +971 00 000 0000 أو 054 000 00"
+    : "Please enter a valid phone number. You can use a local number or an international number with country code.\nExamples: +971 00 000 0000, 054 000 0000,  ";
 }
 
 function getEmailPrompt(language: "en" | "ar"): string {
