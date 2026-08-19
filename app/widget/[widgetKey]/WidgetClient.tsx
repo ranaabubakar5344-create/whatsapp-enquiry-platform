@@ -1431,9 +1431,9 @@ messageRequestActiveRef.current = true;
             <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => window.location.reload()}
-                title={isArabic ? "تحديث المحادثة" : "Refresh chat"}
-                aria-label={isArabic ? "تحديث المحادثة" : "Refresh chat"}
+                onClick={() => void startNewConversation()}
+                title={isArabic ? "بدء محادثة جديدة" : "Start new chat"}
+                aria-label={isArabic ? "بدء محادثة جديدة" : "Start new chat"}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
               >
                 <svg
