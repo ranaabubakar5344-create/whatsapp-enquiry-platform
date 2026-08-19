@@ -1339,7 +1339,7 @@ messageRequestActiveRef.current = true;
       .toUpperCase() || "A";
 
   const ucaDark = "#0A1414";
-  const ucaDarkSoft = "#113131";
+  const ucaDarkSoft = "#000000";
   const ucaLime = "#C8EB00";
   const ucaLimeHover = "#B6D900";
   const ucaLimeSoft = "#F0F7C2";
@@ -1381,7 +1381,7 @@ messageRequestActiveRef.current = true;
 
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-[13px] font-bold leading-5">
-                {config.widget.displayName}
+                UCA Admissions Assistant
               </h1>
               <div className="mt-0.5 flex items-center gap-1.5 text-[9.5px] text-white/85">
                 {config.widget.showOnlineStatus && (
@@ -1399,7 +1399,7 @@ messageRequestActiveRef.current = true;
                       ? isArabic
                         ? "جاري توصيلك بمسؤول التسويق"
                         : "Connecting you to a Marketing Executive"
-                      : config.widget.subtitle}
+                      : "Here to help with courses, admissions and applications"}
                 </span>
               </div>
             </div>
